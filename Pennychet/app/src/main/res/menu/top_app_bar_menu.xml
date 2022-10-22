@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/notify_toolbar_btn"
+        android:icon="@drawable/ic_outline_notifications_24"
+        android:title="Notyf"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/bookmark_toolbar_btn"
+        android:icon="@drawable/ic_outline_bookmark_border_24"
+        android:title="Book"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/calendar_toolbar_btn"
+        android:icon="@drawable/ic_outline_calendar_month_24"
+        android:title="Calend"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/search_toolbar_btn"
+        android:icon="@drawable/ic_outline_search_24"
+        android:title="Search expenses"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/more"
+        android:icon="@drawable/ic_search_api_material"
+        android:title="More Options"
+        app:showAsAction="never" />
+
+</menu>
