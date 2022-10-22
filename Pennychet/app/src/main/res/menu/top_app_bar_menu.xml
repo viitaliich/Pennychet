@@ -5,30 +5,30 @@
     <item
         android:id="@+id/notify_toolbar_btn"
         android:icon="@drawable/ic_outline_notifications_24"
-        android:title="Notyf"
+        android:title="Notifications"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/bookmark_toolbar_btn"
         android:icon="@drawable/ic_outline_bookmark_border_24"
-        android:title="Book"
+        android:title="Bookmarks"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/calendar_toolbar_btn"
         android:icon="@drawable/ic_outline_calendar_month_24"
-        android:title="Calend"
+        android:title="Calendar"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/search_toolbar_btn"
         android:icon="@drawable/ic_outline_search_24"
-        android:title="Search expenses"
+        android:title="Search"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/more"
-        android:icon="@drawable/ic_search_api_material"
+        android:icon="@drawable/ic_baseline_add_24"
         android:title="More Options"
         app:showAsAction="never" />
 
