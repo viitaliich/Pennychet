@@ -1,5 +1,6 @@
 package com.example.pennychet;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -8,16 +9,24 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     // Floating Action Button (FAB)
     FloatingActionButton mAddFab, mAddAlarmFab, mAddPersonFab;
@@ -27,7 +36,22 @@ public class MainActivity extends AppCompatActivity {
     // Drawer Layout
     private DrawerLayout drawerLayout;
 
-    private static final String TAG = "MainActivity";
+    // PieChart
+    PieChart pieChart;
+    int[] colorClassArray = new int[]{Color.LTGRAY, Color.CYAN, Color.BLACK, Color.BLUE};
+    private ArrayList<PieEntry> dataValues1(){
+        ArrayList<PieEntry> dataVals = new ArrayList<>();
+        dataVals.add(new PieEntry(1, "01"));
+        dataVals.add(new PieEntry(2, "02"));
+        dataVals.add(new PieEntry(3, "03"));
+        dataVals.add(new PieEntry(4, "04"));
+        dataVals.add(new PieEntry(5, "05"));
+        dataVals.add(new PieEntry(6, "06"));
+        dataVals.add(new PieEntry(7, "07"));
+        dataVals.add(new PieEntry(8, "08"));
+        dataVals.add(new PieEntry(9, "09"));
+        return dataVals;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +59,22 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // PieChart
+        pieChart = findViewById(R.id.pieChart);
+
+        PieDataSet pieDataSet = new PieDataSet(dataValues1(), "label");
+        pieDataSet.setColors(colorClassArray);
+
+        PieData pieData = new PieData(pieDataSet);
+        pieChart.setData(pieData);
+        pieChart.setDrawRoundedSlices(false);
+        pieChart.setHoleRadius(80);
+        Legend legend = pieChart.getLegend();
+        legend.setEnabled(false);
+        Description description = pieChart.getDescription();
+        description.setEnabled(false);
+        pieChart.invalidate();
 
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolBar);
@@ -46,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         // actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        // NavigationView navigationView = findViewById(R.id.nav_view);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
