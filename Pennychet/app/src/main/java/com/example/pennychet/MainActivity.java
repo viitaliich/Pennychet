@@ -1,7 +1,5 @@
 package com.example.pennychet;
 
-import static java.security.AccessController.getContext;
-
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,8 +18,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentActivity;
+import androidx.room.Room;
 
+import com.example.pennychet.database.AppDatabase;
+import com.example.pennychet.database.User;
+import com.example.pennychet.database.UserDao;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -35,17 +36,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener {
 
     private static final String TAG = "MainActivity";
 
     // Calendar
-
-    TextView tvDate;
-    Button btPickDate;
-
-
+    Button btnPickDate;
 
     // Floating Action Button (FAB)
     FloatingActionButton mAddFab, mAddAlarmFab, mAddPersonFab;
@@ -79,12 +77,13 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // DB
+        // allowMainThreadQueries() not recommended ???
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database-name").allowMainThreadQueries().build();
 
-
-
-
-
-
+        UserDao userDao = db.userDao();
+        List<User> users = userDao.getAll();
 
 
         // PieChart
@@ -165,7 +164,6 @@ public class MainActivity extends AppCompatActivity
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 showBottomSheetDialog();
             }
         });
@@ -202,17 +200,15 @@ public class MainActivity extends AppCompatActivity
 
         // Calendar
 
-        btPickDate = bottomSheetDialog.findViewById(R.id.btnPickDate);
-        btPickDate.setOnClickListener(new View.OnClickListener() {
+        btnPickDate = bottomSheetDialog.findViewById(R.id.btnBottomSheetPickDate);
+        btnPickDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Please note that use your package name here
                 com.example.pennychet.DatePicker mDatePickerDialogFragment;
                 mDatePickerDialogFragment = new com.example.pennychet.DatePicker();
                 mDatePickerDialogFragment.show(getSupportFragmentManager(), "DATE PICK");
             }
         });
-
     }
 
     // Toolbar
@@ -239,7 +235,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDateSet(android.widget.DatePicker datePicker, int year, int month, int day) {
-        btPickDate.setText(day + "." + month + "." + year);
+        btnPickDate.setText(day + "." + month + "." + year);
     }
 }
         /*
