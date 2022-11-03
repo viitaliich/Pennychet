@@ -32,6 +32,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_T1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"

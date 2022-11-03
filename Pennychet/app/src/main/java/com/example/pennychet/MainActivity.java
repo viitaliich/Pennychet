@@ -1,11 +1,18 @@
 package com.example.pennychet;
 
+import static java.security.AccessController.getContext;
+
+import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentActivity;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
@@ -20,13 +28,24 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements DatePickerDialog.OnDateSetListener {
 
     private static final String TAG = "MainActivity";
+
+    // Calendar
+
+    TextView tvDate;
+    Button btPickDate;
+
+
 
     // Floating Action Button (FAB)
     FloatingActionButton mAddFab, mAddAlarmFab, mAddPersonFab;
@@ -59,6 +78,14 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+
+
+
+
+
 
         // PieChart
         pieChart = findViewById(R.id.pieChart);
@@ -131,6 +158,61 @@ public class MainActivity extends AppCompatActivity {
         mAddAlarmFab.setOnClickListener(
                 view -> Toast.makeText(MainActivity.this, "Alarm Added", Toast.LENGTH_SHORT
                 ).show());
+
+        // Categories buttons
+        ImageButton btn_ctg_T1 = (ImageButton)findViewById(R.id.btn_ctg_T1);
+
+        btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showBottomSheetDialog();
+            }
+        });
+    }
+
+    // BottomSheet
+    private void showBottomSheetDialog() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_main);
+        bottomSheetDialog.setCancelable(false);
+        bottomSheetDialog.setCanceledOnTouchOutside(true);
+
+//        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copyLinearLayout);
+//        LinearLayout share = bottomSheetDialog.findViewById(R.id.shareLinearLayout);
+//        LinearLayout upload = bottomSheetDialog.findViewById(R.id.uploadLinearLayout);
+//        LinearLayout download = bottomSheetDialog.findViewById(R.id.download);
+//        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
+
+        bottomSheetDialog.show();
+
+        AutoCompleteTextView autoCompleteTextViewCategoty = bottomSheetDialog.findViewById(R.id.actvCategory);
+        String[] categories = getResources().getStringArray(R.array.categories);
+        List<String> categoriesList = Arrays.asList(categories);
+        ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
+                this, R.layout.drop_down_item, categoriesList);
+        autoCompleteTextViewCategoty.setAdapter(adapterCategory);
+
+        AutoCompleteTextView autoCompleteTextViewAccount = bottomSheetDialog.findViewById(R.id.actvAccount);
+        String[] accounts = getResources().getStringArray(R.array.accounts);
+        List<String> accountsList = Arrays.asList(accounts);
+        ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
+                this, R.layout.drop_down_item, accountsList);
+        autoCompleteTextViewAccount.setAdapter(adapterAccount);
+
+        // Calendar
+
+        btPickDate = bottomSheetDialog.findViewById(R.id.btnPickDate);
+        btPickDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Please note that use your package name here
+                com.example.pennychet.DatePicker mDatePickerDialogFragment;
+                mDatePickerDialogFragment = new com.example.pennychet.DatePicker();
+                mDatePickerDialogFragment.show(getSupportFragmentManager(), "DATE PICK");
+            }
+        });
+
     }
 
     // Toolbar
@@ -155,6 +237,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDateSet(android.widget.DatePicker datePicker, int year, int month, int day) {
+        btPickDate.setText(day + "." + month + "." + year);
+    }
 }
         /*
         TextView textView = (TextView) findViewById(R.id.text_view);

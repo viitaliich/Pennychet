@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Pennychet</string>
+
+    <string-array name="accounts">
+        <item>Cash</item>
+        <item>Card</item>
+    </string-array>
+
+    <string-array name="categories">
+        <item>Groceries</item>
+        <item>Cafe</item>
+        <item>Free Time</item>
+        <item>Transport</item>
+        <item>Takeout</item>
+        <item>Loved ones</item>
+        <item>Gift</item>
+        <item>Games</item>
+        <item>Health</item>
+        <item>Flowers</item>
+        <item>Charity</item>
+        <item>Shopping</item>
+    </string-array>
 </resources>
