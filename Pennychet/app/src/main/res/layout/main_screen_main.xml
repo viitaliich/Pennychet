@@ -31,17 +31,19 @@
                 android:text="Groceries"
                 android:layout_gravity="center"
                 />
+
             <ImageButton
                 android:id="@+id/btn_ctg_T1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="#E53935"
                 android:src="@drawable/ic_outline_shopping_cart_24"
-                android:layout_gravity="center"
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_T1"
                 android:text="btn_cat_T1"
                 android:layout_gravity="center"
                 />

@@ -2,6 +2,7 @@ package com.example.pennychet;
 
 import android.app.DatePickerDialog;
 import android.graphics.Color;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,8 +22,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.room.Room;
 
 import com.example.pennychet.database.AppDatabase;
-import com.example.pennychet.database.User;
-import com.example.pennychet.database.UserDao;
+import com.example.pennychet.database.Expense;
+import com.example.pennychet.database.ExpenseDao;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -31,10 +32,13 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity
@@ -42,7 +46,11 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
-    // Calendar
+    // Main screen category buttons
+    TextView tvCategoryT1;
+    ImageButton btn_ctg_T1;
+
+    // Calendar in category
     Button btnPickDate;
 
     // Floating Action Button (FAB)
@@ -70,6 +78,13 @@ public class MainActivity extends AppCompatActivity
         return dataVals;
     }
 
+    //DB
+    ExpenseDao expenseDao;
+    List<Expense> expenses;
+
+    // Calculation API
+    double accumulatedSum = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: [STARTED]");
@@ -80,11 +95,19 @@ public class MainActivity extends AppCompatActivity
         // DB
         // allowMainThreadQueries() not recommended ???
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database-name").allowMainThreadQueries().build();
+                AppDatabase.class, "Expenses").allowMainThreadQueries().build();
+        expenseDao = db.expenseDao();
 
-        UserDao userDao = db.userDao();
-        List<User> users = userDao.getAll();
+        // TODO: API function to get data from DB by category and update data on screen
+        expenses = expenseDao.getAll();
 
+        // Calculate expenses
+        // TODO: store accumulated income and outcome by category in DB
+        if(expenses.size() > 0) {
+            for (int i = 0; i < expenses.size(); i++) {
+                accumulatedSum += expenses.get(i).sum;
+            }
+        }
 
         // PieChart
         pieChart = findViewById(R.id.pieChart);
@@ -105,11 +128,6 @@ public class MainActivity extends AppCompatActivity
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
-
-        // ActionBar actionbar = getSupportActionBar();
-        // actionbar.setDisplayHomeAsUpEnabled(true);
-        // actionbar.setDisplayShowHomeEnabled(true);
-        // actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -158,9 +176,11 @@ public class MainActivity extends AppCompatActivity
                 view -> Toast.makeText(MainActivity.this, "Alarm Added", Toast.LENGTH_SHORT
                 ).show());
 
-        // Categories buttons
-        ImageButton btn_ctg_T1 = (ImageButton)findViewById(R.id.btn_ctg_T1);
+        // Main screen categories buttons
+        tvCategoryT1 = findViewById(R.id.tv_ctg_T1);
+        tvCategoryT1.setText("UAH " + Double.toString(accumulatedSum));
 
+        btn_ctg_T1 = findViewById(R.id.btn_ctg_T1);
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -173,40 +193,86 @@ public class MainActivity extends AppCompatActivity
     private void showBottomSheetDialog() {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_main);
-        bottomSheetDialog.setCancelable(false);
-        bottomSheetDialog.setCanceledOnTouchOutside(true);
-
-//        LinearLayout copy = bottomSheetDialog.findViewById(R.id.copyLinearLayout);
-//        LinearLayout share = bottomSheetDialog.findViewById(R.id.shareLinearLayout);
-//        LinearLayout upload = bottomSheetDialog.findViewById(R.id.uploadLinearLayout);
-//        LinearLayout download = bottomSheetDialog.findViewById(R.id.download);
-//        LinearLayout delete = bottomSheetDialog.findViewById(R.id.delete);
-
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
         bottomSheetDialog.show();
 
+        // Categories drop down menu
         AutoCompleteTextView autoCompleteTextViewCategoty = bottomSheetDialog.findViewById(R.id.actvCategory);
         String[] categories = getResources().getStringArray(R.array.categories);
         List<String> categoriesList = Arrays.asList(categories);
+        autoCompleteTextViewCategoty.setText(categoriesList.get(0));
         ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, categoriesList);
         autoCompleteTextViewCategoty.setAdapter(adapterCategory);
 
+        // Accounts drop down menu
         AutoCompleteTextView autoCompleteTextViewAccount = bottomSheetDialog.findViewById(R.id.actvAccount);
         String[] accounts = getResources().getStringArray(R.array.accounts);
         List<String> accountsList = Arrays.asList(accounts);
+        autoCompleteTextViewAccount.setText(accountsList.get(0));
         ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, accountsList);
         autoCompleteTextViewAccount.setAdapter(adapterAccount);
 
         // Calendar
-
         btnPickDate = bottomSheetDialog.findViewById(R.id.btnBottomSheetPickDate);
+        String currentDate = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+        btnPickDate.setText(currentDate);
         btnPickDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 com.example.pennychet.DatePicker mDatePickerDialogFragment;
                 mDatePickerDialogFragment = new com.example.pennychet.DatePicker();
                 mDatePickerDialogFragment.show(getSupportFragmentManager(), "DATE PICK");
+            }
+        });
+
+        TextInputLayout tfBottomSheetSum = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetSum);
+        TextView tvBottomSheetSum = bottomSheetDialog.findViewById(R.id.textViewBottomSheetSum);
+        TextView tvBottomSheetDescription = bottomSheetDialog.findViewById(R.id.textViewBottomSheetDescription);
+        Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
+        Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
+
+        btnBottomSheetOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(tvBottomSheetSum.getText().toString().isEmpty())
+                {
+                    tfBottomSheetSum.setError("Required field");
+                }
+                else {
+                    tfBottomSheetSum.setError(null);
+
+                    // DB
+                    String category = String.valueOf(autoCompleteTextViewCategoty.getText());
+                    String account = String.valueOf(autoCompleteTextViewAccount.getText());
+                    String description = String.valueOf(tvBottomSheetDescription.getText());
+                    double sum = Double.parseDouble(String.valueOf(tvBottomSheetSum.getText()));
+                    String date = String.valueOf(btnPickDate.getText());
+
+                    // TODO: API
+                    accumulatedSum += sum;
+
+                    Expense expense = new Expense();
+                    expense.category = category;
+                    expense.account = account;
+                    expense.description = description;
+                    expense.sum = sum;
+                    expense.date = date;
+                    expenseDao.insertAll(expense);
+
+                    // Change main screen values
+                    tvCategoryT1.setText("UAH " + Double.toString(accumulatedSum));
+
+                    bottomSheetDialog.dismiss();
+                }
+            }
+        });
+
+        btnBottomSheetCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetDialog.dismiss();
             }
         });
     }
@@ -235,72 +301,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDateSet(android.widget.DatePicker datePicker, int year, int month, int day) {
-        btnPickDate.setText(day + "." + month + "." + year);
+        btnPickDate.setText(day + "." + (month+1) + "." + year);    // ???
     }
 }
-        /*
-        TextView textView = (TextView) findViewById(R.id.text_view);
-        String textFromTextView = textView.getText().toString();
-        Log.d(TAG, "textFromTextView orig = [" + textFromTextView + "]");
-
-        textView.setText("Set TextView");
-        textFromTextView = textView.getText().toString();
-        Log.d(TAG, "textFromTextView set = [" + textFromTextView + "]");
-
-        Button btnAdd = (Button)findViewById(R.id.btnAdd);
-        Button btnSub = (Button)findViewById(R.id.btnSubtract);
-        Button btnMul = (Button)findViewById(R.id.btnMultiply);
-        Button btnDiv = (Button)findViewById(R.id.btnDivide);
-
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = btnAdd.getText().toString();
-                Toast.makeText(MainActivity.this, "Clicked " + name, Toast.LENGTH_SHORT).show();
-                textView.setText("Last clicked button: " + name);
-                btnAdd.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-
-                Intent intent = new Intent(MainActivity.this, AddActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnSub.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = btnSub.getText().toString();
-                Toast.makeText(MainActivity.this, "Clicked " + name, Toast.LENGTH_SHORT).show();
-                textView.setText("Last clicked button: " + name);
-
-                Intent intent = new Intent(MainActivity.this, SubActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnMul.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = btnMul.getText().toString();
-                Toast.makeText(MainActivity.this, "Clicked " + name, Toast.LENGTH_SHORT).show();
-                textView.setText("Last clicked button: " + name);
-
-                Intent intent = new Intent(MainActivity.this, MulActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnDiv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = btnDiv.getText().toString();
-                Toast.makeText(MainActivity.this, "Clicked " + name, Toast.LENGTH_SHORT).show();
-                textView.setText("Last clicked button: " + name);
-
-                Intent intent = new Intent(MainActivity.this, DivActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        Log.d(TAG, "onCreate: [FINISHED]");
-
-         */
