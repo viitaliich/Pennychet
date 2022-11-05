@@ -63,6 +63,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_T2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -72,6 +73,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_T2"
                 android:text="btn_cat_T2"
                 android:layout_gravity="center"
                 />
@@ -91,6 +93,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_T3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -100,6 +103,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_T3"
                 android:text="btn_cat_T3"
                 android:layout_gravity="center"
 
@@ -120,6 +124,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_T4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -129,6 +134,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_T4"
                 android:text="btn_cat_T4"
                 android:layout_gravity="center"
                 />
@@ -163,6 +169,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_B1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -172,6 +179,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_B1"
                 android:text="btn_cat_B1"
                 android:layout_gravity="center"
                 />
@@ -191,6 +199,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_B2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -200,6 +209,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_B2"
                 android:text="btn_cat_B2"
                 android:layout_gravity="center"
                 />
@@ -219,6 +229,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_B3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -228,6 +239,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_B3"
                 android:text="btn_cat_B3"
                 android:layout_gravity="center"
 
@@ -248,6 +260,7 @@
                 android:layout_gravity="center"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_B4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -257,6 +270,7 @@
 
                 />
             <TextView
+                android:id="@+id/tv_ctg_B4"
                 android:text="btn_cat_B4"
                 android:layout_gravity="center"
                 />
@@ -289,6 +303,7 @@
                 android:layout_gravity="center_horizontal"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_L1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -297,6 +312,7 @@
                 android:layout_gravity="center_horizontal"
                 />
             <TextView
+                android:id="@+id/tv_ctg_L1"
                 android:text="btn_cat_L1"
                 android:layout_gravity="top|center_horizontal"
                 />
@@ -316,6 +332,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_L2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -324,6 +341,7 @@
                 android:layout_gravity="center_horizontal"
                 />
             <TextView
+                android:id="@+id/tv_ctg_L2"
                 android:text="btn_cat_L2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -358,15 +376,17 @@
                 android:text="Loved ones"
                 android:layout_gravity="center_horizontal"
                 />
+
             <ImageButton
+                android:id="@+id/btn_ctg_R1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="#640062"
-                android:src="@drawable/ic_baseline_favorite_border_24"
-                android:layout_gravity="center_horizontal"
-                />
+                android:src="@drawable/ic_baseline_favorite_border_24" />
             <TextView
+                android:id="@+id/tv_ctg_R1"
                 android:text="btn_ctg_R1"
                 android:layout_gravity="top|center_horizontal"
                 />
@@ -386,6 +406,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 />
             <ImageButton
+                android:id="@+id/btn_ctg_R2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
@@ -394,6 +415,7 @@
                 android:layout_gravity="center_horizontal"
                 />
             <TextView
+                android:id="@+id/tv_ctg_R2"
                 android:text="btn_cat_R2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

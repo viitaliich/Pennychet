@@ -53,6 +53,39 @@ public class MainActivity extends AppCompatActivity
     TextView tvCategoryT1;
     ImageButton btn_ctg_T1;
 
+    TextView tvCategoryT2;
+    ImageButton btn_ctg_T2;
+
+    TextView tvCategoryT3;
+    ImageButton btn_ctg_T3;
+
+    TextView tvCategoryT4;
+    ImageButton btn_ctg_T4;
+
+    TextView tvCategoryL1;
+    ImageButton btn_ctg_L1;
+
+    TextView tvCategoryL2;
+    ImageButton btn_ctg_L2;
+
+    TextView tvCategoryR1;
+    ImageButton btn_ctg_R1;
+
+    TextView tvCategoryR2;
+    ImageButton btn_ctg_R2;
+
+    TextView tvCategoryB1;
+    ImageButton btn_ctg_B1;
+
+    TextView tvCategoryB2;
+    ImageButton btn_ctg_B2;
+
+    TextView tvCategoryB3;
+    ImageButton btn_ctg_B3;
+
+    TextView tvCategoryB4;
+    ImageButton btn_ctg_B4;
+
     // Calendar in category
     Button btnPickDate;
 
@@ -103,18 +136,24 @@ public class MainActivity extends AppCompatActivity
         dataFromDB.expensesCategoryB3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[10]);
         dataFromDB.expensesCategoryB4 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[11]);
 
-        dataFromDB.accumulatedExpensesCategoryT1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[0]);
-        dataFromDB.accumulatedExpensesCategoryT2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[1]);
-        dataFromDB.accumulatedExpensesCategoryT3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[2]);
-        dataFromDB.accumulatedExpensesCategoryT4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[3]);
-        dataFromDB.accumulatedExpensesCategoryL1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[4]);
-        dataFromDB.accumulatedExpensesCategoryL2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[5]);
-        dataFromDB.accumulatedExpensesCategoryR1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[6]);
-        dataFromDB.accumulatedExpensesCategoryR2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[7]);
-        dataFromDB.accumulatedExpensesCategoryB1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[8]);
-        dataFromDB.accumulatedExpensesCategoryB2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[9]);
-        dataFromDB.accumulatedExpensesCategoryB3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[10]);
-        dataFromDB.accumulatedExpensesCategoryB4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[11]);
+        for(int i = 0; i < 12; i++)
+        {
+            dataFromDB.accumulatedExpensesByCategory[i] =
+                    accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[i]);
+        }
+
+//        dataFromDB.accumulatedExpensesCategoryT1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[0]);
+//        dataFromDB.accumulatedExpensesCategoryT2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[1]);
+//        dataFromDB.accumulatedExpensesCategoryT3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[2]);
+//        dataFromDB.accumulatedExpensesCategoryT4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[3]);
+//        dataFromDB.accumulatedExpensesCategoryL1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[4]);
+//        dataFromDB.accumulatedExpensesCategoryL2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[5]);
+//        dataFromDB.accumulatedExpensesCategoryR1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[6]);
+//        dataFromDB.accumulatedExpensesCategoryR2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[7]);
+//        dataFromDB.accumulatedExpensesCategoryB1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[8]);
+//        dataFromDB.accumulatedExpensesCategoryB2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[9]);
+//        dataFromDB.accumulatedExpensesCategoryB3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[10]);
+//        dataFromDB.accumulatedExpensesCategoryB4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[11]);
     }
 
     @Override
@@ -204,25 +243,190 @@ public class MainActivity extends AppCompatActivity
 
         // Main screen categories buttons
         tvCategoryT1 = findViewById(R.id.tv_ctg_T1);
-        if(dataFromDB.accumulatedExpensesCategoryT1 == null) {
+        tvCategoryT2 = findViewById(R.id.tv_ctg_T2);
+        tvCategoryT3 = findViewById(R.id.tv_ctg_T3);
+        tvCategoryT4 = findViewById(R.id.tv_ctg_T4);
+        tvCategoryL1 = findViewById(R.id.tv_ctg_L1);
+        tvCategoryL2 = findViewById(R.id.tv_ctg_L2);
+        tvCategoryR1 = findViewById(R.id.tv_ctg_R1);
+        tvCategoryR2 = findViewById(R.id.tv_ctg_R2);
+        tvCategoryB1 = findViewById(R.id.tv_ctg_B1);
+        tvCategoryB2 = findViewById(R.id.tv_ctg_B2);
+        tvCategoryB3 = findViewById(R.id.tv_ctg_B3);
+        tvCategoryB4 = findViewById(R.id.tv_ctg_B4);
+
+        if(dataFromDB.accumulatedExpensesByCategory[0] == null) {
             tvCategoryT1.setText("UAH 0");
-        }
-        else
-        {
-            tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesCategoryT1.sum);
-        }
+        } else
+            tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[0].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[1] == null) {
+            tvCategoryT2.setText("UAH 0");
+        } else
+            tvCategoryT2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[1].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[2] == null) {
+            tvCategoryT3.setText("UAH 0");
+        } else
+            tvCategoryT3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[2].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[3] == null) {
+            tvCategoryT4.setText("UAH 0");
+        } else
+            tvCategoryT4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[3].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[4] == null) {
+            tvCategoryL1.setText("UAH 0");
+        } else
+            tvCategoryL1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[4].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[5] == null) {
+            tvCategoryL2.setText("UAH 0");
+        } else
+            tvCategoryL2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[5].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[6] == null) {
+            tvCategoryR1.setText("UAH 0");
+        } else
+            tvCategoryR1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[6].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[7] == null) {
+            tvCategoryR2.setText("UAH 0");
+        } else
+            tvCategoryR2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[7].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[8] == null) {
+            tvCategoryB1.setText("UAH 0");
+        } else
+            tvCategoryB1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[8].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[9] == null) {
+            tvCategoryB2.setText("UAH 0");
+        } else
+            tvCategoryB2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[9].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[10] == null) {
+            tvCategoryB3.setText("UAH 0");
+        } else
+            tvCategoryB3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[10].sum);
+
+        if(dataFromDB.accumulatedExpensesByCategory[11] == null) {
+            tvCategoryB4.setText("UAH 0");
+        } else
+            tvCategoryB4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[11].sum);
+
 
         btn_ctg_T1 = findViewById(R.id.btn_ctg_T1);
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showBottomSheetDialog(dataFromDB);
+                int btnIndex = 0;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_T2 = findViewById(R.id.btn_ctg_T2);
+        btn_ctg_T2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 1;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_T3 = findViewById(R.id.btn_ctg_T3);
+        btn_ctg_T3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 2;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_T4 = findViewById(R.id.btn_ctg_T4);
+        btn_ctg_T4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 3;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_L1 = findViewById(R.id.btn_ctg_L1);
+        btn_ctg_L1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 4;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_L2 = findViewById(R.id.btn_ctg_L2);
+        btn_ctg_L2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 5;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_R1 = findViewById(R.id.btn_ctg_R1);
+        btn_ctg_R1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 6;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_R2 = findViewById(R.id.btn_ctg_R2);
+        btn_ctg_R2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 7;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_B1 = findViewById(R.id.btn_ctg_B1);
+        btn_ctg_B1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 8;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_B2 = findViewById(R.id.btn_ctg_B2);
+        btn_ctg_B2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 9;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_B3 = findViewById(R.id.btn_ctg_B3);
+        btn_ctg_B3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 10;
+                showBottomSheetDialog(dataFromDB, btnIndex);
+            }
+        });
+
+        btn_ctg_B4 = findViewById(R.id.btn_ctg_B4);
+        btn_ctg_B4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int btnIndex = 11;
+                showBottomSheetDialog(dataFromDB, btnIndex);
             }
         });
     }
 
     // BottomSheet
-    private void showBottomSheetDialog(DataFromDB dataFromDB) {
+    private void showBottomSheetDialog(DataFromDB dataFromDB, int btnIndex) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_main);
         bottomSheetDialog.setCanceledOnTouchOutside(false);
@@ -232,7 +436,7 @@ public class MainActivity extends AppCompatActivity
         AutoCompleteTextView autoCompleteTextViewCategoty = bottomSheetDialog.findViewById(R.id.actvCategory);
         String[] categories = getResources().getStringArray(R.array.categories);
         List<String> categoriesList = Arrays.asList(categories);
-        autoCompleteTextViewCategoty.setText(categoriesList.get(0));
+        autoCompleteTextViewCategoty.setText(categoriesList.get(btnIndex));
         ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, categoriesList);
         autoCompleteTextViewCategoty.setAdapter(adapterCategory);
@@ -292,20 +496,62 @@ public class MainActivity extends AppCompatActivity
                     expenseDao.insertAll(expense);
 
                     double accumulatedSum = 0;
-                    if(dataFromDB.accumulatedExpensesCategoryT1 == null) {
+                    if(dataFromDB.accumulatedExpensesByCategory[btnIndex] == null) {
+                        Log.i("@@@", "null");
                         AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
                         accumulatedExpense.category = category;
                         accumulatedExpense.sum = sum;
                         accumulatedExpenseDao.insertAll(accumulatedExpense);
+                        accumulatedSum += sum;
                     }
                     else
                     {
-                        dataFromDB.accumulatedExpensesCategoryT1.sum += sum;
-                        accumulatedSum = dataFromDB.accumulatedExpensesCategoryT1.sum;
-                        accumulatedExpenseDao.updateSum(dataFromDB.accumulatedExpensesCategoryT1.sum, category);
+                        dataFromDB.accumulatedExpensesByCategory[btnIndex].sum += sum;
+                        accumulatedSum = dataFromDB.accumulatedExpensesByCategory[btnIndex].sum;
+                        accumulatedExpenseDao.updateSum(dataFromDB.accumulatedExpensesByCategory[btnIndex].sum, category);
                     }
                     // Change main screen values
-                    tvCategoryT1.setText("UAH " + accumulatedSum);
+                    switch (btnIndex){
+                        case 0:
+                            tvCategoryT1.setText("UAH " + accumulatedSum);
+                            break;
+                        case 1:
+                            tvCategoryT2.setText("UAH " + accumulatedSum);
+                            break;
+                        case 2:
+                            tvCategoryT3.setText("UAH " + accumulatedSum);
+                            break;
+                        case 3:
+                            tvCategoryT4.setText("UAH " + accumulatedSum);
+                            break;
+                        case 4:
+                            tvCategoryL1.setText("UAH " + accumulatedSum);
+                            break;
+                        case 5:
+                            tvCategoryL2.setText("UAH " + accumulatedSum);
+                            break;
+                        case 6:
+                            tvCategoryR1.setText("UAH " + accumulatedSum);
+                            break;
+                        case 7:
+                            tvCategoryR2.setText("UAH " + accumulatedSum);
+                            break;
+                        case 8:
+                            tvCategoryB1.setText("UAH " + accumulatedSum);
+                            break;
+                        case 9:
+                            tvCategoryB2.setText("UAH " + accumulatedSum);
+                            break;
+                        case 10:
+                            tvCategoryB3.setText("UAH " + accumulatedSum);
+                            break;
+                        case 11:
+                            tvCategoryB4.setText("UAH " + accumulatedSum);
+                            break;
+                        default:
+                            break;      // ???
+
+                    }
 
                     bottomSheetDialog.dismiss();
                 }
