@@ -12,6 +12,9 @@ public interface ExpenseDao {
     @Query("SELECT * FROM expense")
     List<Expense> getAll();
 
+    @Query("SELECT * FROM expense WHERE category LIKE :ctg")
+    List<Expense> getAllByCategory(String ctg);
+
     @Query("SELECT * FROM expense WHERE id IN (:expenseIds)")
     List<Expense> loadAllByIds(int[] expenseIds);
 

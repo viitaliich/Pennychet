@@ -21,7 +21,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.room.Room;
 
+import com.example.pennychet.database.AccumulatedExpense;
+import com.example.pennychet.database.AccumulatedExpenseDao;
 import com.example.pennychet.database.AppDatabase;
+import com.example.pennychet.database.DataFromDB;
 import com.example.pennychet.database.Expense;
 import com.example.pennychet.database.ExpenseDao;
 import com.github.mikephil.charting.charts.PieChart;
@@ -80,10 +83,39 @@ public class MainActivity extends AppCompatActivity
 
     //DB
     ExpenseDao expenseDao;
+    AccumulatedExpenseDao accumulatedExpenseDao;
     List<Expense> expenses;
 
     // Calculation API
-    double accumulatedSum = 0;
+
+    void getAllDataFromDB(DataFromDB dataFromDB)
+    {
+        dataFromDB.expensesCategoryT1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[0]);
+        dataFromDB.expensesCategoryT2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[1]);
+        dataFromDB.expensesCategoryT3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[2]);
+        dataFromDB.expensesCategoryT4 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[3]);
+        dataFromDB.expensesCategoryL1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[4]);
+        dataFromDB.expensesCategoryL2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[5]);
+        dataFromDB.expensesCategoryR1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[6]);
+        dataFromDB.expensesCategoryR2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[7]);
+        dataFromDB.expensesCategoryB1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[8]);
+        dataFromDB.expensesCategoryB2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[9]);
+        dataFromDB.expensesCategoryB3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[10]);
+        dataFromDB.expensesCategoryB4 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[11]);
+
+        dataFromDB.accumulatedExpensesCategoryT1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[0]);
+        dataFromDB.accumulatedExpensesCategoryT2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[1]);
+        dataFromDB.accumulatedExpensesCategoryT3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[2]);
+        dataFromDB.accumulatedExpensesCategoryT4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[3]);
+        dataFromDB.accumulatedExpensesCategoryL1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[4]);
+        dataFromDB.accumulatedExpensesCategoryL2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[5]);
+        dataFromDB.accumulatedExpensesCategoryR1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[6]);
+        dataFromDB.accumulatedExpensesCategoryR2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[7]);
+        dataFromDB.accumulatedExpensesCategoryB1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[8]);
+        dataFromDB.accumulatedExpensesCategoryB2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[9]);
+        dataFromDB.accumulatedExpensesCategoryB3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[10]);
+        dataFromDB.accumulatedExpensesCategoryB4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[11]);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,20 +126,14 @@ public class MainActivity extends AppCompatActivity
 
         // DB
         // allowMainThreadQueries() not recommended ???
+        DataFromDB dataFromDB = new DataFromDB();
+
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Expenses").allowMainThreadQueries().build();
         expenseDao = db.expenseDao();
+        accumulatedExpenseDao = db.accumulatedExpenseDao();
 
-        // TODO: API function to get data from DB by category and update data on screen
-        expenses = expenseDao.getAll();
-
-        // Calculate expenses
-        // TODO: store accumulated income and outcome by category in DB
-        if(expenses.size() > 0) {
-            for (int i = 0; i < expenses.size(); i++) {
-                accumulatedSum += expenses.get(i).sum;
-            }
-        }
+        getAllDataFromDB(dataFromDB);
 
         // PieChart
         pieChart = findViewById(R.id.pieChart);
@@ -178,19 +204,25 @@ public class MainActivity extends AppCompatActivity
 
         // Main screen categories buttons
         tvCategoryT1 = findViewById(R.id.tv_ctg_T1);
-        tvCategoryT1.setText("UAH " + Double.toString(accumulatedSum));
+        if(dataFromDB.accumulatedExpensesCategoryT1 == null) {
+            tvCategoryT1.setText("UAH 0");
+        }
+        else
+        {
+            tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesCategoryT1.sum);
+        }
 
         btn_ctg_T1 = findViewById(R.id.btn_ctg_T1);
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showBottomSheetDialog();
+                showBottomSheetDialog(dataFromDB);
             }
         });
     }
 
     // BottomSheet
-    private void showBottomSheetDialog() {
+    private void showBottomSheetDialog(DataFromDB dataFromDB) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_main);
         bottomSheetDialog.setCanceledOnTouchOutside(false);
@@ -251,8 +283,6 @@ public class MainActivity extends AppCompatActivity
                     String date = String.valueOf(btnPickDate.getText());
 
                     // TODO: API
-                    accumulatedSum += sum;
-
                     Expense expense = new Expense();
                     expense.category = category;
                     expense.account = account;
@@ -261,8 +291,21 @@ public class MainActivity extends AppCompatActivity
                     expense.date = date;
                     expenseDao.insertAll(expense);
 
+                    double accumulatedSum = 0;
+                    if(dataFromDB.accumulatedExpensesCategoryT1 == null) {
+                        AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
+                        accumulatedExpense.category = category;
+                        accumulatedExpense.sum = sum;
+                        accumulatedExpenseDao.insertAll(accumulatedExpense);
+                    }
+                    else
+                    {
+                        dataFromDB.accumulatedExpensesCategoryT1.sum += sum;
+                        accumulatedSum = dataFromDB.accumulatedExpensesCategoryT1.sum;
+                        accumulatedExpenseDao.updateSum(dataFromDB.accumulatedExpensesCategoryT1.sum, category);
+                    }
                     // Change main screen values
-                    tvCategoryT1.setText("UAH " + Double.toString(accumulatedSum));
+                    tvCategoryT1.setText("UAH " + accumulatedSum);
 
                     bottomSheetDialog.dismiss();
                 }
