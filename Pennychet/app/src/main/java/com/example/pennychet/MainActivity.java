@@ -99,19 +99,24 @@ public class MainActivity extends AppCompatActivity
 
     // PieChart
     PieChart pieChart;
-    int[] colorClassArray = new int[]{Color.LTGRAY, Color.CYAN, Color.BLACK, Color.BLUE};
-    private ArrayList<PieEntry> dataValues1(){
-        ArrayList<PieEntry> dataVals = new ArrayList<>();
-        dataVals.add(new PieEntry(1, "01"));
-        dataVals.add(new PieEntry(2, "02"));
-        dataVals.add(new PieEntry(3, "03"));
-        dataVals.add(new PieEntry(4, "04"));
-        dataVals.add(new PieEntry(5, "05"));
-        dataVals.add(new PieEntry(6, "06"));
-        dataVals.add(new PieEntry(7, "07"));
-        dataVals.add(new PieEntry(8, "08"));
-        dataVals.add(new PieEntry(9, "09"));
-        return dataVals;
+    PieDataSet pieDataSet;
+
+    ArrayList<PieEntry> pieChartCategories(DataFromDB dataFromDB){
+        ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[0].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[1].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[2].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[3].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[4].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[5].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[6].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[7].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[8].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[9].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[10].sum, ""));
+        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[11].sum, ""));
+
+        return pieChartCtg;
     }
 
     //DB
@@ -123,6 +128,13 @@ public class MainActivity extends AppCompatActivity
 
     void getAllDataFromDB(DataFromDB dataFromDB)
     {
+        for (int i = 0; i < dataFromDB.categoriesNames.length; i++) {
+            AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
+            accumulatedExpense.category = dataFromDB.categoriesNames[i];
+            accumulatedExpense.sum = 0;
+            accumulatedExpenseDao.insertAll(accumulatedExpense);
+        }
+
         dataFromDB.expensesCategoryT1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[0]);
         dataFromDB.expensesCategoryT2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[1]);
         dataFromDB.expensesCategoryT3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[2]);
@@ -141,19 +153,6 @@ public class MainActivity extends AppCompatActivity
             dataFromDB.accumulatedExpensesByCategory[i] =
                     accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[i]);
         }
-
-//        dataFromDB.accumulatedExpensesCategoryT1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[0]);
-//        dataFromDB.accumulatedExpensesCategoryT2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[1]);
-//        dataFromDB.accumulatedExpensesCategoryT3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[2]);
-//        dataFromDB.accumulatedExpensesCategoryT4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[3]);
-//        dataFromDB.accumulatedExpensesCategoryL1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[4]);
-//        dataFromDB.accumulatedExpensesCategoryL2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[5]);
-//        dataFromDB.accumulatedExpensesCategoryR1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[6]);
-//        dataFromDB.accumulatedExpensesCategoryR2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[7]);
-//        dataFromDB.accumulatedExpensesCategoryB1 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[8]);
-//        dataFromDB.accumulatedExpensesCategoryB2 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[9]);
-//        dataFromDB.accumulatedExpensesCategoryB3 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[10]);
-//        dataFromDB.accumulatedExpensesCategoryB4 = accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[11]);
     }
 
     @Override
@@ -177,17 +176,37 @@ public class MainActivity extends AppCompatActivity
         // PieChart
         pieChart = findViewById(R.id.pieChart);
 
-        PieDataSet pieDataSet = new PieDataSet(dataValues1(), "label");
+        int[] colorClassArray = new int[]{
+                getResources().getColor(R.color.ctgT1),
+                getResources().getColor(R.color.ctgT2),
+                getResources().getColor(R.color.ctgT3),
+                getResources().getColor(R.color.ctgT4),
+                getResources().getColor(R.color.ctgL1),
+                getResources().getColor(R.color.ctgL2),
+                getResources().getColor(R.color.ctgR1),
+                getResources().getColor(R.color.ctgR2),
+                getResources().getColor(R.color.ctgB1),
+                getResources().getColor(R.color.ctgB2),
+                getResources().getColor(R.color.ctgB3),
+                getResources().getColor(R.color.ctgB4),
+        };
+
+        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB), "label");
         pieDataSet.setColors(colorClassArray);
 
         PieData pieData = new PieData(pieDataSet);
         pieChart.setData(pieData);
         pieChart.setDrawRoundedSlices(false);
-        pieChart.setHoleRadius(80);
+        pieChart.setUsePercentValues(false);
+        pieChart.setHoleRadius(65);
         Legend legend = pieChart.getLegend();
         legend.setEnabled(false);
         Description description = pieChart.getDescription();
         description.setEnabled(false);
+        pieDataSet.setValueTextColor(Color.WHITE);
+        pieDataSet.setValueTextSize(10);
+        pieDataSet.setSliceSpace(1);
+        pieChart.animateX(400);
         pieChart.invalidate();
 
         // Toolbar
@@ -255,66 +274,18 @@ public class MainActivity extends AppCompatActivity
         tvCategoryB3 = findViewById(R.id.tv_ctg_B3);
         tvCategoryB4 = findViewById(R.id.tv_ctg_B4);
 
-        if(dataFromDB.accumulatedExpensesByCategory[0] == null) {
-            tvCategoryT1.setText("UAH 0");
-        } else
-            tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[0].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[1] == null) {
-            tvCategoryT2.setText("UAH 0");
-        } else
-            tvCategoryT2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[1].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[2] == null) {
-            tvCategoryT3.setText("UAH 0");
-        } else
-            tvCategoryT3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[2].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[3] == null) {
-            tvCategoryT4.setText("UAH 0");
-        } else
-            tvCategoryT4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[3].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[4] == null) {
-            tvCategoryL1.setText("UAH 0");
-        } else
-            tvCategoryL1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[4].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[5] == null) {
-            tvCategoryL2.setText("UAH 0");
-        } else
-            tvCategoryL2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[5].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[6] == null) {
-            tvCategoryR1.setText("UAH 0");
-        } else
-            tvCategoryR1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[6].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[7] == null) {
-            tvCategoryR2.setText("UAH 0");
-        } else
-            tvCategoryR2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[7].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[8] == null) {
-            tvCategoryB1.setText("UAH 0");
-        } else
-            tvCategoryB1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[8].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[9] == null) {
-            tvCategoryB2.setText("UAH 0");
-        } else
-            tvCategoryB2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[9].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[10] == null) {
-            tvCategoryB3.setText("UAH 0");
-        } else
-            tvCategoryB3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[10].sum);
-
-        if(dataFromDB.accumulatedExpensesByCategory[11] == null) {
-            tvCategoryB4.setText("UAH 0");
-        } else
-            tvCategoryB4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[11].sum);
-
+        tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[0].sum);
+        tvCategoryT2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[1].sum);
+        tvCategoryT3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[2].sum);
+        tvCategoryT4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[3].sum);
+        tvCategoryL1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[4].sum);
+        tvCategoryL2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[5].sum);
+        tvCategoryR1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[6].sum);
+        tvCategoryR2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[7].sum);
+        tvCategoryB1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[8].sum);
+        tvCategoryB2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[9].sum);
+        tvCategoryB3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[10].sum);
+        tvCategoryB4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[11].sum);
 
         btn_ctg_T1 = findViewById(R.id.btn_ctg_T1);
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
@@ -479,6 +450,9 @@ public class MainActivity extends AppCompatActivity
                 else {
                     tfBottomSheetSum.setError(null);
 
+                    pieChart.notifyDataSetChanged();
+                    pieChart.invalidate();
+
                     // DB
                     String category = String.valueOf(autoCompleteTextViewCategoty.getText());
                     String account = String.valueOf(autoCompleteTextViewAccount.getText());
@@ -486,7 +460,6 @@ public class MainActivity extends AppCompatActivity
                     double sum = Double.parseDouble(String.valueOf(tvBottomSheetSum.getText()));
                     String date = String.valueOf(btnPickDate.getText());
 
-                    // TODO: API
                     Expense expense = new Expense();
                     expense.category = category;
                     expense.account = account;
@@ -497,7 +470,6 @@ public class MainActivity extends AppCompatActivity
 
                     double accumulatedSum = 0;
                     if(dataFromDB.accumulatedExpensesByCategory[btnIndex] == null) {
-                        Log.i("@@@", "null");
                         AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
                         accumulatedExpense.category = category;
                         accumulatedExpense.sum = sum;
@@ -510,6 +482,9 @@ public class MainActivity extends AppCompatActivity
                         accumulatedSum = dataFromDB.accumulatedExpensesByCategory[btnIndex].sum;
                         accumulatedExpenseDao.updateSum(dataFromDB.accumulatedExpensesByCategory[btnIndex].sum, category);
                     }
+
+                    updatePieChart(pieChart, pieDataSet, btnIndex, accumulatedSum);
+
                     // Change main screen values
                     switch (btnIndex){
                         case 0:
@@ -550,7 +525,6 @@ public class MainActivity extends AppCompatActivity
                             break;
                         default:
                             break;      // ???
-
                     }
 
                     bottomSheetDialog.dismiss();
@@ -564,6 +538,14 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetDialog.dismiss();
             }
         });
+    }
+
+    void updatePieChart(PieChart pieChart, PieDataSet pieDataSet, int entryIndex, double newData)
+    {
+        pieDataSet.getEntries().set(entryIndex, new PieEntry((int)newData, ""));
+        pieChart.notifyDataSetChanged();
+        pieChart.animateX(400);
+        pieChart.invalidate();
     }
 
     // Toolbar

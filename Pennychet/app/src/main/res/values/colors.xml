@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="ctgT1">#FFE53935</color>
+    <color name="ctgT2">#00897B</color>
+    <color name="ctgT3">#8E24AA</color>
+    <color name="ctgT4">#7CB342</color>
+    <color name="ctgL1">#1A237E</color>
+    <color name="ctgL2">#B71C1C</color>
+    <color name="ctgR1">#640062</color>
+    <color name="ctgR2">#F38686</color>
+    <color name="ctgB1">#3949AB</color>
+    <color name="ctgB2">#FDD835</color>
+    <color name="ctgB3">#039BE5</color>
+    <color name="ctgB4">#FB8C00</color>
+
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
