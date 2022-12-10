@@ -1,42 +1,37 @@
 package com.example.pennychet;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.hardware.fingerprint.FingerprintManager;
 import android.icu.text.SimpleDateFormat;
-import android.os.Build;
 import android.os.Bundle;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyPermanentlyInvalidatedException;
-import android.security.keystore.KeyProperties;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 import androidx.room.Room;
 
 import com.example.pennychet.database.AccumulatedExpense;
@@ -53,39 +48,29 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.net.ssl.HttpsURLConnection;
-import javax.security.cert.CertificateException;
 
 
 public class MainActivity extends AppCompatActivity
-        implements DatePickerDialog.OnDateSetListener {
+        implements DatePickerDialog.OnDateSetListener,
+        NavigationView.OnNavigationItemSelectedListener{
 
     private static final String TAG = "MainActivity";
 
@@ -206,6 +191,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.bringToFront();
+
         // DB
         // allowMainThreadQueries() not recommended ???
         DataFromDB dataFromDB = new DataFromDB();
@@ -248,7 +237,7 @@ public class MainActivity extends AppCompatActivity
         Description description = pieChart.getDescription();
         description.setEnabled(false);
         pieDataSet.setValueTextColor(Color.WHITE);
-        pieDataSet.setValueTextSize(10);
+        pieDataSet.setValueTextSize(0);
         pieDataSet.setSliceSpace(1);
         pieChart.animateX(400);
         pieChart.invalidate();
@@ -754,10 +743,53 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.search_toolbar_btn) {
+        if (id == R.id.chart_toolbar_btn)
+        {
+            Intent intent = new Intent(MainActivity.this, ChartsActivity.class);
+            startActivity(intent);
+        }
+        if (id == R.id.account_toolbar_btn) {
+
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_accounts);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+
+            ListView accountsListView = bottomSheetDialog.findViewById(R.id.listView);
+            // Accounts drop down menu
+            String[] accounts = getResources().getStringArray(R.array.accounts);
+            List<String> accountsList = Arrays.asList(accounts);
+            ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
+                    this, R.layout.drop_down_item, accountsList);
+            accountsListView.setAdapter(adapterAccount);
+
+            accountsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View itemClicked, int position,
+                                        long id) {
+                    Toolbar toolbar = findViewById(R.id.toolBar);
+                    toolbar.setTitle(((TextView) itemClicked).getText() + " - 135 UAH");
+                    bottomSheetDialog.cancel();
+                }
+            });
+
+
             return true;
         }
-        // TODO
+        if (id == R.id.calendar_toolbar_btn)
+        {
+            com.example.pennychet.DatePicker mDatePickerDialogFragment;
+            mDatePickerDialogFragment = new com.example.pennychet.DatePicker();
+            mDatePickerDialogFragment.show(getSupportFragmentManager(), "DATE PICK");
+            return true;
+        }
+        if (id == R.id.transfer_toolbar_btn)
+        {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_transfer);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -765,5 +797,29 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDateSet(android.widget.DatePicker datePicker, int year, int month, int day) {
         btnPickDate.setText(day + "." + (month+1) + "." + year);    // ???
+    }
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_import) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_import);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+        } else if (id == R.id.nav_export) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_export);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
