@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout android:id="@+id/linearLayoutHistoryItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:layout_marginTop="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+        android:id="@+id/imageViewHistoryItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|start"
+        android:layout_weight="1"
+
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1"
+        >
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/textViewHistoryCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="?android:attr/activatedBackgroundIndicator"
+            android:layout_weight="1"
+
+            >
+
+        </TextView>
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/textViewHistoryDate"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:background="?android:attr/activatedBackgroundIndicator"
+            android:layout_weight="1"
+
+            >
+
+        </TextView>
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/textViewHistoryAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="16sp"
+            android:background="?android:attr/activatedBackgroundIndicator"
+            android:layout_weight="1"
+
+            >
+
+        </TextView>
+
+    </LinearLayout>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/textViewHistorySum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:background="?android:attr/activatedBackgroundIndicator"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        >
+
+    </TextView>
+
+    <ImageButton
+        android:id="@+id/btn_history_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_baseline_circle_56"
+        android:backgroundTint="@color/gray"
+        android:src="@drawable/ic_outline_edit_24"
+        android:layout_gravity="center"
+
+        />
+
+    <ImageButton
+        android:id="@+id/btn_history_del"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_baseline_circle_56"
+        android:backgroundTint="@color/ctgL1"
+        android:src="@drawable/ic_outline_delete_24"
+        android:layout_gravity="center"
+
+        />
+
+</LinearLayout>

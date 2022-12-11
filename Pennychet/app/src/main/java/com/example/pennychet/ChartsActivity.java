@@ -43,18 +43,18 @@ public class ChartsActivity extends AppCompatActivity {
 
         String[] categories = getResources().getStringArray(R.array.categories);
         ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
-        pieChartCtg.add(new PieEntry(1, categories[0]));
-        pieChartCtg.add(new PieEntry(2, categories[1]));
-        pieChartCtg.add(new PieEntry(3, categories[2]));
-        pieChartCtg.add(new PieEntry(4, categories[3]));
-        pieChartCtg.add(new PieEntry(5, categories[4]));
-        pieChartCtg.add(new PieEntry(6, categories[5]));
-        pieChartCtg.add(new PieEntry(7, categories[6]));
-        pieChartCtg.add(new PieEntry(8, categories[7]));
-        pieChartCtg.add(new PieEntry(9, categories[8]));
-        pieChartCtg.add(new PieEntry(10, categories[9]));
-        pieChartCtg.add(new PieEntry(11, categories[10]));
-        pieChartCtg.add(new PieEntry(12, categories[11]));
+        pieChartCtg.add(new PieEntry(3000, categories[0]));
+        pieChartCtg.add(new PieEntry(1000, categories[1]));
+        pieChartCtg.add(new PieEntry(0, categories[2]));
+        pieChartCtg.add(new PieEntry(100, categories[3]));
+        pieChartCtg.add(new PieEntry(0, categories[4]));
+        pieChartCtg.add(new PieEntry(2500, categories[5]));
+        pieChartCtg.add(new PieEntry(0, categories[6]));
+        pieChartCtg.add(new PieEntry(0, categories[7]));
+        pieChartCtg.add(new PieEntry(10000, categories[8]));
+        pieChartCtg.add(new PieEntry(0, categories[9]));
+        pieChartCtg.add(new PieEntry(0, categories[10]));
+        pieChartCtg.add(new PieEntry(0, categories[11]));
 
         pieChart = findViewById(R.id.pieChart);
 
@@ -126,18 +126,18 @@ public class ChartsActivity extends AppCompatActivity {
         BarDataSet barDataSet;
 
         ArrayList<BarEntry> barChartCtg = new ArrayList<>();
-        barChartCtg.add(new BarEntry(1, new float[] {1, 10}, "label 1"));
-        barChartCtg.add(new BarEntry(2, new float[] {2, 20}, "label 2"));
-        barChartCtg.add(new BarEntry(3, new float[] {3, 30}, "label 3"));
-        barChartCtg.add(new BarEntry(4, new float[] {4, 40}, "label 3"));
-        barChartCtg.add(new BarEntry(5, new float[] {5, 50}, "label 3"));
-        barChartCtg.add(new BarEntry(6, new float[] {6, 60}, "label 3"));
-        barChartCtg.add(new BarEntry(7, new float[] {7, 70}));
-        barChartCtg.add(new BarEntry(8, new float[] {8, 80}));
-        barChartCtg.add(new BarEntry(9, new float[] {9, 90}));
-        barChartCtg.add(new BarEntry(10, new float[] {10, 100}));
-        barChartCtg.add(new BarEntry(11, new float[] {0, 110}));
-        barChartCtg.add(new BarEntry(12, new float[] {12, 120}));
+        barChartCtg.add(new BarEntry(1, new float[] {3000, 4000}, "label 1"));
+        barChartCtg.add(new BarEntry(2, new float[] {1000, 750}, "label 2"));
+        barChartCtg.add(new BarEntry(3, new float[] {0, 1000}, "label 3"));
+        barChartCtg.add(new BarEntry(4, new float[] {100, 250}, "label 3"));
+        barChartCtg.add(new BarEntry(5, new float[] {0, 0}, "label 3"));
+        barChartCtg.add(new BarEntry(6, new float[] {2500, 0}, "label 3"));
+        barChartCtg.add(new BarEntry(7, new float[] {0, 0}));
+        barChartCtg.add(new BarEntry(8, new float[] {0, 0}));
+        barChartCtg.add(new BarEntry(9, new float[] {10000, 0}));
+        barChartCtg.add(new BarEntry(10, new float[] {0, 0}));
+        barChartCtg.add(new BarEntry(11, new float[] {0, 0}));
+        barChartCtg.add(new BarEntry(12, new float[] {0, 0}));
 
         barChart = findViewById(R.id.barChart);
 
@@ -196,13 +196,13 @@ public class ChartsActivity extends AppCompatActivity {
 
 
         ArrayList<Entry> lineChartCtg = new ArrayList<>();
-        lineChartCtg.add(new Entry(1, 1, "label 1"));
-        lineChartCtg.add(new Entry(2, 2, "label 2"));
-        lineChartCtg.add(new Entry(3, 3, "label 3"));
-        lineChartCtg.add(new Entry(4, 4, "label 3"));
-        lineChartCtg.add(new Entry(5, 5, "label 3"));
-        lineChartCtg.add(new Entry(6, 6, "label 3"));
-        lineChartCtg.add(new Entry(7, 7));
+        lineChartCtg.add(new Entry(1, 100, "label 1"));
+        lineChartCtg.add(new Entry(2, 269, "label 2"));
+        lineChartCtg.add(new Entry(3, 0, "label 3"));
+        lineChartCtg.add(new Entry(4, 269, "label 3"));
+        lineChartCtg.add(new Entry(5, 0, "label 3"));
+        lineChartCtg.add(new Entry(6, 600, "label 3"));
+        lineChartCtg.add(new Entry(7, 550));
 
 
         lineDataSet = new LineDataSet(lineChartCtg, "");

@@ -30,6 +30,10 @@
             android:name=".ChartsActivity"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="true">
+        </activity>
 
 	</application>
 

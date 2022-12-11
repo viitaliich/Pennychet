@@ -11,13 +11,13 @@
         <item>Cafe</item>
         <item>Free Time</item>
         <item>Transport</item>
-        <item>Takeout</item>
+        <item>Taxi</item>
         <item>Gift</item>
-        <item>Loved ones</item>
-        <item>Games</item>
-        <item>Health</item>
-        <item>Flowers</item>
         <item>Charity</item>
-        <item>Shopping</item>
+        <item>Games</item>
+        <item>Salary</item>
+        <item>Bonuses</item>
+        <item>Pension</item>
+        <item>Social</item>
     </string-array>
 </resources>

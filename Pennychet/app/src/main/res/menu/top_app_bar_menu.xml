@@ -26,4 +26,10 @@
         android:title="Transfer"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/history_toolbar_btn"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:title="History"
+        app:showAsAction="ifRoom" />
+
 </menu>

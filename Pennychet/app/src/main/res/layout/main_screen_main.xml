@@ -165,7 +165,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Health"
+                android:text="Salary"
                 android:layout_gravity="center"
                 />
             <ImageButton
@@ -174,7 +174,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="@color/ctgB1"
-                android:src="@drawable/ic_outline_health_and_safety_24"
+                android:src="@drawable/ic_outline_attach_money_24"
                 android:layout_gravity="center"
 
                 />
@@ -195,7 +195,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Flowers"
+                android:text="Bonuses"
                 android:layout_gravity="center"
                 />
             <ImageButton
@@ -204,7 +204,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="@color/ctgB2"
-                android:src="@drawable/ic_round_local_florist_24"
+                android:src="@drawable/ic_baseline_price_check_24"
                 android:layout_gravity="center"
 
                 />
@@ -225,7 +225,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Charity"
+                android:text="Pension"
                 android:layout_gravity="center"
                 />
             <ImageButton
@@ -234,7 +234,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="@color/ctgB3"
-                android:src="@drawable/ic_baseline_face_24"
+                android:src="@drawable/ic_outline_elderly_24"
                 android:layout_gravity="center"
 
                 />
@@ -256,7 +256,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Shopping"
+                android:text="Social"
                 android:layout_gravity="center"
                 />
             <ImageButton
@@ -265,7 +265,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="@color/ctgB4"
-                android:src="@drawable/ic_outline_local_mall_24"
+                android:src="@drawable/ic_baseline_social_distance_24"
                 android:layout_gravity="center"
 
                 />
@@ -299,7 +299,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Takeout"
+                android:text="Taxi"
                 android:layout_gravity="center_horizontal"
                 />
             <ImageButton
@@ -308,7 +308,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_baseline_circle_56"
                 android:backgroundTint="@color/ctgL1"
-                android:src="@drawable/ic_outline_takeout_dining_24"
+                android:src="@drawable/ic_baseline_local_taxi_24"
                 android:layout_gravity="center_horizontal"
                 />
             <TextView
@@ -373,7 +373,7 @@
             android:gravity="center"
             >
             <TextView
-                android:text="Loved ones"
+                android:text="Charity"
                 android:layout_gravity="center_horizontal"
                 />
 

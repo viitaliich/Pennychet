@@ -29,9 +29,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.NavigationUI;
 import androidx.room.Room;
 
 import com.example.pennychet.database.AccumulatedExpense;
@@ -328,6 +325,17 @@ public class MainActivity extends AppCompatActivity
                 showBottomSheetDialog(dataFromDB, btnIndex);
 
 
+            }
+        });
+
+        btn_ctg_T1.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+                bottomSheetDialog.setContentView(R.layout.bottom_sheet_ctg_settings);
+                bottomSheetDialog.setCanceledOnTouchOutside(false);
+                bottomSheetDialog.show();
+                return true;
             }
         });
 
@@ -746,6 +754,11 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.chart_toolbar_btn)
         {
             Intent intent = new Intent(MainActivity.this, ChartsActivity.class);
+            startActivity(intent);
+        }
+        if (id == R.id.history_toolbar_btn)
+        {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
         }
         if (id == R.id.account_toolbar_btn) {
