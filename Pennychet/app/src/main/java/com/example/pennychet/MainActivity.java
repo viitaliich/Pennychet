@@ -1,24 +1,9 @@
 package com.example.pennychet;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
-import android.app.KeyguardManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.hardware.fingerprint.FingerprintManager;
 import android.icu.text.SimpleDateFormat;
-import android.os.Build;
 import android.os.Bundle;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyPermanentlyInvalidatedException;
-import android.security.keystore.KeyProperties;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,19 +17,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.room.Room;
 
 import com.example.pennychet.database.AccumulatedExpense;
-import com.example.pennychet.database.AccumulatedExpenseDao;
 import com.example.pennychet.database.AppDatabase;
 import com.example.pennychet.database.DataFromDB;
 import com.example.pennychet.database.Expense;
-import com.example.pennychet.database.ExpenseDao;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -55,43 +35,18 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.math.BigInteger;
-import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.net.ssl.HttpsURLConnection;
-import javax.security.cert.CertificateException;
-
-
 public class MainActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener {
 
     private static final String TAG = "MainActivity";
 
-    // Notifications
-    private static final int NOTIFY_ID = 1;
-    private static final String CHANNEL_ID = "Monobank";
+    String mCurrency = "UAH";
 
     // Main screen category buttons
     TextView tvCategoryT1;
@@ -130,79 +85,21 @@ public class MainActivity extends AppCompatActivity
     TextView tvCategoryB4;
     ImageButton btn_ctg_B4;
 
-    // Calendar in category
+    // Calendar button inside category
     Button btnPickDate;
+    String mDate;
 
     // Floating Action Button (FAB)
     FloatingActionButton mAddFab, mAddAlarmFab, mAddPersonFab;
     TextView addAlarmActionText, addPersonActionText;
     Boolean isAllFabsVisible;
 
-    // Drawer Layout
-    private DrawerLayout drawerLayout;
-
     // PieChart
     PieChart pieChart;
     PieDataSet pieDataSet;
 
-    ArrayList<PieEntry> pieChartCategories(DataFromDB dataFromDB){
-        ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[0].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[1].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[2].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[3].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[4].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[5].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[6].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[7].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[8].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[9].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[10].sum, ""));
-        pieChartCtg.add(new PieEntry((int)dataFromDB.accumulatedExpensesByCategory[11].sum, ""));
-
-        return pieChartCtg;
-    }
-
-    //DB
-    ExpenseDao expenseDao;
-    AccumulatedExpenseDao accumulatedExpenseDao;
-    List<Expense> expenses;
-
-    // Calculation API
-
-    void getAllDataFromDB(DataFromDB dataFromDB)
-    {
-        for (int i = 0; i < dataFromDB.categoriesNames.length; i++) {
-            AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
-            accumulatedExpense.category = dataFromDB.categoriesNames[i];
-            accumulatedExpense.sum = 0;
-            accumulatedExpenseDao.insertAll(accumulatedExpense);
-        }
-
-        dataFromDB.expensesCategoryT1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[0]);
-        dataFromDB.expensesCategoryT2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[1]);
-        dataFromDB.expensesCategoryT3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[2]);
-        dataFromDB.expensesCategoryT4 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[3]);
-        dataFromDB.expensesCategoryL1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[4]);
-        dataFromDB.expensesCategoryL2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[5]);
-        dataFromDB.expensesCategoryR1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[6]);
-        dataFromDB.expensesCategoryR2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[7]);
-        dataFromDB.expensesCategoryB1 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[8]);
-        dataFromDB.expensesCategoryB2 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[9]);
-        dataFromDB.expensesCategoryB3 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[10]);
-        dataFromDB.expensesCategoryB4 = expenseDao.getAllByCategory(dataFromDB.categoriesNames[11]);
-
-        for(int i = 0; i < 12; i++)
-        {
-            dataFromDB.accumulatedExpensesByCategory[i] =
-                    accumulatedExpenseDao.getByCategory(dataFromDB.categoriesNames[i]);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: [STARTED]");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -212,14 +109,12 @@ public class MainActivity extends AppCompatActivity
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Expenses").allowMainThreadQueries().build();
-        expenseDao = db.expenseDao();
-        accumulatedExpenseDao = db.accumulatedExpenseDao();
+        dataFromDB.setExpenseDao(db.expenseDao());
+        dataFromDB.setAccumulatedExpenseDao(db.accumulatedExpenseDao());
 
-        getAllDataFromDB(dataFromDB);
+        dataFromDB.getAllDataFromDB();
 
         // PieChart
-        pieChart = findViewById(R.id.pieChart);
-
         int[] colorClassArray = new int[]{
                 getResources().getColor(R.color.ctgT1),
                 getResources().getColor(R.color.ctgT2),
@@ -235,29 +130,16 @@ public class MainActivity extends AppCompatActivity
                 getResources().getColor(R.color.ctgB4),
         };
 
-        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB), "label");
-        pieDataSet.setColors(colorClassArray);
-
-        PieData pieData = new PieData(pieDataSet);
-        pieChart.setData(pieData);
-        pieChart.setDrawRoundedSlices(false);
-        pieChart.setUsePercentValues(false);
-        pieChart.setHoleRadius(65);
-        Legend legend = pieChart.getLegend();
-        legend.setEnabled(false);
-        Description description = pieChart.getDescription();
-        description.setEnabled(false);
-        pieDataSet.setValueTextColor(Color.WHITE);
-        pieDataSet.setValueTextSize(10);
-        pieDataSet.setSliceSpace(1);
-        pieChart.animateX(400);
+        setupPieChart(dataFromDB, colorClassArray);
         pieChart.invalidate();
+
+        // Drawer Layout
+        DrawerLayout drawerLayout;
+        drawerLayout = findViewById(R.id.drawer_layout);
 
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
-
-        drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -318,18 +200,18 @@ public class MainActivity extends AppCompatActivity
         tvCategoryB3 = findViewById(R.id.tv_ctg_B3);
         tvCategoryB4 = findViewById(R.id.tv_ctg_B4);
 
-        tvCategoryT1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[0].sum);
-        tvCategoryT2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[1].sum);
-        tvCategoryT3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[2].sum);
-        tvCategoryT4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[3].sum);
-        tvCategoryL1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[4].sum);
-        tvCategoryL2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[5].sum);
-        tvCategoryR1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[6].sum);
-        tvCategoryR2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[7].sum);
-        tvCategoryB1.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[8].sum);
-        tvCategoryB2.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[9].sum);
-        tvCategoryB3.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[10].sum);
-        tvCategoryB4.setText("UAH " + dataFromDB.accumulatedExpensesByCategory[11].sum);
+        tvCategoryT1.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[0].sum));
+        tvCategoryT2.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[1].sum));
+        tvCategoryT3.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[2].sum));
+        tvCategoryT4.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[3].sum));
+        tvCategoryL1.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[4].sum));
+        tvCategoryL2.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[5].sum));
+        tvCategoryR1.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[6].sum));
+        tvCategoryR2.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[7].sum));
+        tvCategoryB1.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[8].sum));
+        tvCategoryB2.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[9].sum));
+        tvCategoryB3.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[10].sum));
+        tvCategoryB4.setText(String.format("%s %s", mCurrency, dataFromDB.getAccumulatedExpensesByCategory()[11].sum));
 
         btn_ctg_T1 = findViewById(R.id.btn_ctg_T1);
         btn_ctg_T1.setOnClickListener(new View.OnClickListener() {
@@ -337,8 +219,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 int btnIndex = 0;
                 showBottomSheetDialog(dataFromDB, btnIndex);
-
-
             }
         });
 
@@ -442,102 +322,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public static String getMd5(String input)
-    {
-        try {
-
-            // Static getInstance method is called with hashing MD5
-            MessageDigest md = MessageDigest.getInstance("MD5");
-
-            // digest() method is called to calculate message digest
-            // of an input digest() return array of byte
-            byte[] messageDigest = md.digest(input.getBytes());
-
-            // Convert byte array into signum representation
-            BigInteger no = new BigInteger(1, messageDigest);
-
-            // Convert message digest into hex value
-            String hashtext = no.toString(16);
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
-            }
-            return hashtext;
-        }
-
-        // For specifying wrong message digest algorithms
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String download(String urlPath) throws IOException {
-        StringBuilder xmlResult = new StringBuilder();
-        BufferedReader reader = null;
-        InputStream stream = null;
-        HttpsURLConnection connection = null;
-        try {
-            URL url = new URL(urlPath);
-            connection = (HttpsURLConnection) url.openConnection();
-            String request = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "            <request version=\"1.0\">\n" +
-                    "                <merchant>\n" +
-                    "                    <id>75482</id>\n" +
-                    "                    <signature>ab871c9601cf28920c4c0ff63041ea585da9de89</signature>\n" +
-                    "                </merchant>\n" +
-                    "                <data>\n" +
-                    "                    <oper>cmt</oper>\n" +
-                    "                    <wait>0</wait>\n" +
-                    "                    <test>0</test>\n" +
-                    "                    <payment id=\"\">\n" +
-                    "                    <prop name=\"cardnum\" value=\"5168742060221193\" />\n" +
-                    "                    <prop name=\"country\" value=\"UA\" />\n" +
-                    "                    </payment>\n" +
-                    "                </data>\n" +
-                    "            </request>";
-
-//            Log.i("@@@", getMd5("<oper>cmt</oper>\n" +
-//                    "                    <wait>0</wait>\n" +
-//                    "                    <test>0</test>\n" +
-//                    "                    <payment id=\"\">\n" +
-//                    "                    <prop name=\"cardnum\" value=\"5168742060221193\" />\n" +
-//                    "                    <prop name=\"country\" value=\"UA\" />\n" +
-//                    "                    </payment>"));
-            connection.setRequestProperty ( "X-Token", "u2GZ5UCNjOaRyR8Ey14_Ct3KBQ8DitOtEeLOWqKHJUiw" );
-//            connection.setDoOutput(true);
-//            connection.setDoInput(true);
-//            connection.setRequestMethod("POST");
-//            OutputStreamWriter writer = new OutputStreamWriter( connection.getOutputStream() );
-//            writer.write( request );
-//            writer.flush();
-//            writer.close();
-
-            Log.i("@@@", "1");
-
-            stream = connection.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(stream));
-            String line;
-            Log.i("@@@", "2");
-
-            while ((line=reader.readLine()) != null) {
-                xmlResult.append(line);
-            }
-
-            Log.i("@@@",  "" + connection.getResponseCode());
-
-            return xmlResult.toString();
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-            if (stream != null) {
-                stream.close();
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    }
-
     // BottomSheet
     private void showBottomSheetDialog(DataFromDB dataFromDB, int btnIndex) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -565,8 +349,8 @@ public class MainActivity extends AppCompatActivity
 
         // Calendar
         btnPickDate = bottomSheetDialog.findViewById(R.id.btnBottomSheetPickDate);
-        String currentDate = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
-        btnPickDate.setText(currentDate);
+        mDate = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+        btnPickDate.setText(mDate);
         btnPickDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -580,61 +364,11 @@ public class MainActivity extends AppCompatActivity
         TextView tvBottomSheetSum = bottomSheetDialog.findViewById(R.id.textViewBottomSheetSum);
         TextView tvBottomSheetDescription = bottomSheetDialog.findViewById(R.id.textViewBottomSheetDescription);
         Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
-        Button btnTestNotif = bottomSheetDialog.findViewById(R.id.btnTestNotif);
         Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
-
-        btnTestNotif.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
-                PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this,
-                        0, notificationIntent,
-                        PendingIntent.FLAG_IMMUTABLE);
-
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
-                notificationChannel.enableLights(true);
-                notificationChannel.enableVibration(true);
-                notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID);
-                builder.setSmallIcon(R.drawable.ic_outline_attach_money_24);
-                builder.setContentTitle("Pennychet");
-                builder.setContentText("Check your expenses");
-                builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                builder.setAutoCancel(true);
-                builder.setColor(Color.GREEN);
-                builder.addAction(R.drawable.ic_baseline_add_24, "Открыть", contentIntent)
-                        .addAction(R.drawable.ic_baseline_category_24, "Отказаться", contentIntent)
-                        .addAction(R.drawable.ic_launcher_background, "Другой вариант", contentIntent);
-                builder.setContentIntent(contentIntent);
-
-
-                NotificationManagerCompat notificationManager =
-                        NotificationManagerCompat.from(MainActivity.this);
-
-                notificationManager.createNotificationChannel(notificationChannel);
-
-                notificationManager.notify(NOTIFY_ID, builder.build());
-            }
-        });
 
         btnBottomSheetOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            String url = "https://api.monobank.ua/bank/currency";
-                            //String url = "https://api.monobank.ua/personal/statement/0/1668413595";
-                            String content = download(url);
-                            Log.i("@@@", content);
-                        } catch (IOException e) {
-                            Log.i("@@@", "5");
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-
                 if(tvBottomSheetSum.getText().toString().isEmpty())
                 {
                     tfBottomSheetSum.setError("Required field");
@@ -650,7 +384,7 @@ public class MainActivity extends AppCompatActivity
                     String account = String.valueOf(autoCompleteTextViewAccount.getText());
                     String description = String.valueOf(tvBottomSheetDescription.getText());
                     double sum = Double.parseDouble(String.valueOf(tvBottomSheetSum.getText()));
-                    String date = String.valueOf(btnPickDate.getText());
+                    String date = String.valueOf(mDate);
 
                     Expense expense = new Expense();
                     expense.category = category;
@@ -658,21 +392,21 @@ public class MainActivity extends AppCompatActivity
                     expense.description = description;
                     expense.sum = sum;
                     expense.date = date;
-                    expenseDao.insertAll(expense);
+                    dataFromDB.getExpenseDao().insertAll(expense);
 
                     double accumulatedSum = 0;
-                    if(dataFromDB.accumulatedExpensesByCategory[btnIndex] == null) {
+                    if(dataFromDB.getAccumulatedExpensesByCategory()[btnIndex] == null) {
                         AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
                         accumulatedExpense.category = category;
                         accumulatedExpense.sum = sum;
-                        accumulatedExpenseDao.insertAll(accumulatedExpense);
+                        dataFromDB.getAccumulatedExpenseDao().insertAll(accumulatedExpense);
                         accumulatedSum += sum;
                     }
                     else
                     {
-                        dataFromDB.accumulatedExpensesByCategory[btnIndex].sum += sum;
-                        accumulatedSum = dataFromDB.accumulatedExpensesByCategory[btnIndex].sum;
-                        accumulatedExpenseDao.updateSum(dataFromDB.accumulatedExpensesByCategory[btnIndex].sum, category);
+                        dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum += sum;
+                        accumulatedSum = dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum;
+                        dataFromDB.getAccumulatedExpenseDao().updateSum(dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum, category);
                     }
 
                     updatePieChart(pieChart, pieDataSet, btnIndex, accumulatedSum);
@@ -680,43 +414,44 @@ public class MainActivity extends AppCompatActivity
                     // Change main screen values
                     switch (btnIndex){
                         case 0:
-                            tvCategoryT1.setText("UAH " + accumulatedSum);
+                            tvCategoryT1.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 1:
-                            tvCategoryT2.setText("UAH " + accumulatedSum);
+                            tvCategoryT2.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 2:
-                            tvCategoryT3.setText("UAH " + accumulatedSum);
+                            tvCategoryT3.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 3:
-                            tvCategoryT4.setText("UAH " + accumulatedSum);
+                            tvCategoryT4.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 4:
-                            tvCategoryL1.setText("UAH " + accumulatedSum);
+                            tvCategoryL1.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 5:
-                            tvCategoryL2.setText("UAH " + accumulatedSum);
+                            tvCategoryL2.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 6:
-                            tvCategoryR1.setText("UAH " + accumulatedSum);
+                            tvCategoryR1.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 7:
-                            tvCategoryR2.setText("UAH " + accumulatedSum);
+                            tvCategoryR2.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 8:
-                            tvCategoryB1.setText("UAH " + accumulatedSum);
+                            tvCategoryB1.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 9:
-                            tvCategoryB2.setText("UAH " + accumulatedSum);
+                            tvCategoryB2.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 10:
-                            tvCategoryB3.setText("UAH " + accumulatedSum);
+                            tvCategoryB3.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         case 11:
-                            tvCategoryB4.setText("UAH " + accumulatedSum);
+                            tvCategoryB4.setText(String.format("%s %s", mCurrency, accumulatedSum));
                             break;
                         default:
-                            break;      // ???
+                            Log.e(TAG, "Error in update of accumulated value");
+                            break;
                     }
 
                     bottomSheetDialog.dismiss();
@@ -730,6 +465,36 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetDialog.dismiss();
             }
         });
+    }
+
+    ArrayList<PieEntry> pieChartCategories(AccumulatedExpense[] accumulatedExpensesByCategory){
+        ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
+        for(int i = 0; i < 12; i++)     // number of categories ???
+        {
+            pieChartCtg.add(new PieEntry((int)accumulatedExpensesByCategory[i].sum, ""));
+        }
+        return pieChartCtg;
+    }
+
+    void setupPieChart(DataFromDB dataFromDB, int[] colorClassArray)
+    {
+        pieChart = findViewById(R.id.pieChart);
+        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB.getAccumulatedExpensesByCategory()), "label");
+        pieDataSet.setColors(colorClassArray);
+
+        PieData pieData = new PieData(pieDataSet);
+        pieChart.setData(pieData);
+        pieChart.setDrawRoundedSlices(false);
+        pieChart.setUsePercentValues(false);
+        pieChart.setHoleRadius(65);
+        Legend legend = pieChart.getLegend();
+        legend.setEnabled(false);
+        Description description = pieChart.getDescription();
+        description.setEnabled(false);
+        pieDataSet.setValueTextColor(Color.WHITE);
+        pieDataSet.setValueTextSize(10);
+        pieDataSet.setSliceSpace(1);
+        pieChart.animateX(400);
     }
 
     void updatePieChart(PieChart pieChart, PieDataSet pieDataSet, int entryIndex, double newData)
@@ -754,7 +519,7 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.search_toolbar_btn) {
+        if (id == R.id.calendar_toolbar_btn) {
             return true;
         }
         // TODO
@@ -764,6 +529,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDateSet(android.widget.DatePicker datePicker, int year, int month, int day) {
-        btnPickDate.setText(day + "." + (month+1) + "." + year);    // ???
+        mDate = String.format("%d.%d.%d", day, month+1, year);
+        btnPickDate.setText(mDate);
     }
 }
