@@ -1,27 +1,23 @@
 package com.example.pennychet.database;
 
+import java.util.List;
+
 public class DataFromDB {
 
 //    private String mCurrencyType = "UAH";
 
     private String[] categoriesNames;
-    private Category[] categories;
+    private List<Category> categories;
 
     private TransactionDao transactionDao;
     private AccountDao accountDao;
     private AccumulatedDateDao accumulatedDateDao;
     private CategoryDao categoryDao;
 
-    public Category[] getCategory()
+    public List<Category> getCategories()
     {
         return categories;
     }
-
-
-//    public String getCurrencyType()
-//    {
-//        return mCurrencyType;
-//    }
 
     public void setTransactionDao(TransactionDao transactionDao)
     {
@@ -47,28 +43,27 @@ public class DataFromDB {
     }
     public AccumulatedDateDao getAccumulatedDateDao() { return accumulatedDateDao; }
 
-    public void getAllDataFromDB()
+    public void getAllCategory()
     {
-        for (int i = 0; i < categoriesNames.length; i++) {
-            Category category = new Category();
-            category.type = "Expences";
-            category.name = categoriesNames[i];
-            category.year = 2023;
-            category.month = 1;
-            category.sum_year = 0;
-            category.sum_month = 0;
-            categories[i] = category;
-            categoryDao.insertAll(category);
+        categories = categoryDao.getAll();
+        if (categories.isEmpty())
+        {
+            for (String categoriesName : categoriesNames) {
+                Category category = new Category();
+                category.type = "Expenses";     // ???
+                category.name = categoriesName;
+                category.year = 2023;           // ???
+                category.month = 1;             // ???
+                category.sum_year = 0;
+                category.sum_month = 0;
+                categories.add(category);
+                categoryDao.insertAll(category);
+            }
         }
     }
 
-    public DataFromDB()
+    public DataFromDB(String[] categories)
     {
-        categoriesNames = new String[]{"Groceries", "Cafe", "Free Time", "Transport",
-                "Takeout", "Gift",
-                "Loved ones", "Games",
-                "Health", "Flowers", "Charity", "Shopping"};
-
-        categories = new Category[12];
+        categoriesNames = categories;
     }
 }

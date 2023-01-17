@@ -101,9 +101,11 @@ public class MainActivity extends AppCompatActivity
                 getResources().getColor(R.color.ctg12),
         };
 
+        String[] categories = getResources().getStringArray(R.array.categories);
+
         // DB
         // allowMainThreadQueries() not recommended ???
-        DataFromDB dataFromDB = new DataFromDB();
+        DataFromDB dataFromDB = new DataFromDB(categories);
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Transactions").allowMainThreadQueries().build();
@@ -112,10 +114,9 @@ public class MainActivity extends AppCompatActivity
         dataFromDB.setAccountDao(db.accountDao());
         dataFromDB.setAccumulatedDateDao(db.accumulatedDateDao());
 
-        dataFromDB.getAllDataFromDB();
+        dataFromDB.getAllCategory();
 
         // CategoryButtons
-        String[] categories = getResources().getStringArray(R.array.categories);
 
         ctgGridView = findViewById(R.id.ctgGridView);
         ctgGridView.setExpanded(true);
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity
         gridModelArrayList = new ArrayList<GridModel>();
         for(int i = 0; i < categories.length; i++)
         {
-            gridModelArrayList.add(new GridModel(categories[i], btnIconArray[i], ctgColorArray[i], (int)dataFromDB.getCategory()[i].sum_month));
+            gridModelArrayList.add(new GridModel(categories[i], btnIconArray[i], ctgColorArray[i], (int)dataFromDB.getCategories().get(i).sum_month));
         }
         adapter = new GridAdapter(this, gridModelArrayList);
         ctgGridView.setAdapter(adapter);
@@ -243,7 +244,8 @@ public class MainActivity extends AppCompatActivity
                 {
                     tfBottomSheetSum.setError("Required field");
                 }
-                else {
+                else
+                {
                     tfBottomSheetSum.setError(null);
 
                     // DB
@@ -262,29 +264,14 @@ public class MainActivity extends AppCompatActivity
                     transaction.date = date;
                     dataFromDB.getTransactionDao().insertAll(transaction);
 
-                    double accumulatedSum = 0;
-                    if(dataFromDB.getCategory()[btnIndex] == null) {
-                        Category accumulatedExpense = new Category();
-                        accumulatedExpense.type = "Expences";
-                        accumulatedExpense.name = category;
-                        accumulatedExpense.year = 2023;
-                        accumulatedExpense.month = 1;
-                        accumulatedExpense.sum_year = sum;
-                        accumulatedExpense.sum_month = sum;
-                        dataFromDB.getCategoryDao().insertAll(accumulatedExpense);
-                        accumulatedSum += sum;
-                    }
-                    else
-                    {
-                        dataFromDB.getCategory()[btnIndex].sum_month += sum;
-                        dataFromDB.getCategory()[btnIndex].sum_year += sum;
-                        accumulatedSum = dataFromDB.getCategory()[btnIndex].sum_month;
-                        dataFromDB.getCategoryDao().updateSumMonth(dataFromDB.getCategory()[btnIndex].sum_month, category);
-                    }
+                    dataFromDB.getCategories().get(btnIndex).sum_month += sum;
+                    dataFromDB.getCategories().get(btnIndex).sum_year += sum;
+                    double accumulatedSum = dataFromDB.getCategories().get(btnIndex).sum_month;
+                    dataFromDB.getCategoryDao().updateSumMonth(dataFromDB.getCategories().get(btnIndex).sum_month, category);
 
                     updatePieChart(pieChart, pieDataSet, btnIndex, accumulatedSum);
 
-                    gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategory()[btnIndex].sum_month);
+                    gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategories().get(btnIndex).sum_month);
                     adapter.notifyDataSetChanged();
                     ctgGridView.invalidate();
 
@@ -301,11 +288,11 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    ArrayList<PieEntry> pieChartCategories(Category[] categories){
+    ArrayList<PieEntry> pieChartCategories(List<Category> categories){
         ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
-        for(int i = 0; i < 12; i++)     // number of categories ???
+        for(int i = 0; i < categories.size(); i++)
         {
-            pieChartCtg.add(new PieEntry((int)categories[i].sum_month, ""));
+            pieChartCtg.add(new PieEntry((int)categories.get(i).sum_month, ""));
         }
         return pieChartCtg;
     }
@@ -313,7 +300,7 @@ public class MainActivity extends AppCompatActivity
     void setupPieChart(DataFromDB dataFromDB, int[] colorClassArray)
     {
         pieChart = findViewById(R.id.pieChart);
-        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB.getCategory()), "label");
+        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB.getCategories()), "label");
         pieDataSet.setColors(colorClassArray);
 
         PieData pieData = new PieData(pieDataSet);
