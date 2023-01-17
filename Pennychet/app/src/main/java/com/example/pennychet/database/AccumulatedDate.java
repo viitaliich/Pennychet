@@ -5,18 +5,12 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity
-public class Expense {
+public class AccumulatedDate {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name = "category")
-    public String category;
-
-    @ColumnInfo(name = "account")
-    public String account;
-
-    @ColumnInfo(name = "description")
-    public String description;
+    @ColumnInfo(name = "type")
+    public String type;
 
     @ColumnInfo(name = "date")
     public String date;

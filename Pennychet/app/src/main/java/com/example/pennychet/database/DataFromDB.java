@@ -1,61 +1,64 @@
 package com.example.pennychet.database;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DataFromDB {
 
 //    private String mCurrencyType = "UAH";
 
     private String[] categoriesNames;
-    private AccumulatedExpense[] accumulatedExpensesByCategory;
+    private Category[] categories;
 
-    private ExpenseDao expenseDao;
-    private AccumulatedExpenseDao accumulatedExpenseDao;
+    private TransactionDao transactionDao;
+    private AccountDao accountDao;
+    private AccumulatedDateDao accumulatedDateDao;
+    private CategoryDao categoryDao;
 
-    public AccumulatedExpense[] getAccumulatedExpensesByCategory()
+    public Category[] getCategory()
     {
-        return accumulatedExpensesByCategory;
+        return categories;
     }
 
-    public ExpenseDao getExpenseDao()
-    {
-        return expenseDao;
-    }
 
 //    public String getCurrencyType()
 //    {
 //        return mCurrencyType;
 //    }
 
-    public void setExpenseDao(ExpenseDao expenseDao)
+    public void setTransactionDao(TransactionDao transactionDao)
     {
-        this.expenseDao = expenseDao;
+        this.transactionDao = transactionDao;
     }
+    public TransactionDao getTransactionDao() { return transactionDao; }
 
-    public AccumulatedExpenseDao getAccumulatedExpenseDao()
+    public void setAccountDao(AccountDao accountDao)
     {
-        return accumulatedExpenseDao;
+        this.accountDao = accountDao;
     }
+    public AccountDao getAccountDao() { return accountDao; }
 
-    public void setAccumulatedExpenseDao(AccumulatedExpenseDao accumulatedExpenseDao)
+    public void setCategoryDao(CategoryDao categoryDao)
     {
-        this.accumulatedExpenseDao = accumulatedExpenseDao;
+        this.categoryDao = categoryDao;
     }
+    public CategoryDao getCategoryDao() { return categoryDao; }
+
+    public void setAccumulatedDateDao(AccumulatedDateDao accumulatedDateDao)
+    {
+        this.accumulatedDateDao = accumulatedDateDao;
+    }
+    public AccumulatedDateDao getAccumulatedDateDao() { return accumulatedDateDao; }
 
     public void getAllDataFromDB()
     {
         for (int i = 0; i < categoriesNames.length; i++) {
-            AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
-            accumulatedExpense.category = categoriesNames[i];
-            accumulatedExpense.sum = 0;
-            accumulatedExpenseDao.insertAll(accumulatedExpense);
-        }
-
-        for(int i = 0; i < 12; i++)
-        {
-            getAccumulatedExpensesByCategory()[i] =
-                    accumulatedExpenseDao.getByCategory(categoriesNames[i]);
+            Category category = new Category();
+            category.type = "Expences";
+            category.name = categoriesNames[i];
+            category.year = 2023;
+            category.month = 1;
+            category.sum_year = 0;
+            category.sum_month = 0;
+            categories[i] = category;
+            categoryDao.insertAll(category);
         }
     }
 
@@ -66,6 +69,6 @@ public class DataFromDB {
                 "Loved ones", "Games",
                 "Health", "Flowers", "Charity", "Shopping"};
 
-        accumulatedExpensesByCategory = new AccumulatedExpense[12];
+        categories = new Category[12];
     }
 }

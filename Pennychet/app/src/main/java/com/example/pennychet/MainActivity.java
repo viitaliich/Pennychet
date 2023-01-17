@@ -20,10 +20,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.room.Room;
 
-import com.example.pennychet.database.AccumulatedExpense;
 import com.example.pennychet.database.AppDatabase;
+import com.example.pennychet.database.Category;
 import com.example.pennychet.database.DataFromDB;
-import com.example.pennychet.database.Expense;
+import com.example.pennychet.database.Transaction;
 import com.example.pennychet.ui.ExpandableHeightGridView;
 import com.example.pennychet.ui.GridAdapter;
 import com.example.pennychet.ui.GridModel;
@@ -106,9 +106,11 @@ public class MainActivity extends AppCompatActivity
         DataFromDB dataFromDB = new DataFromDB();
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "Expenses").allowMainThreadQueries().build();
-        dataFromDB.setExpenseDao(db.expenseDao());
-        dataFromDB.setAccumulatedExpenseDao(db.accumulatedExpenseDao());
+                AppDatabase.class, "Transactions").allowMainThreadQueries().build();
+        dataFromDB.setTransactionDao(db.transactionDao());
+        dataFromDB.setCategoryDao(db.categoryDao());
+        dataFromDB.setAccountDao(db.accountDao());
+        dataFromDB.setAccumulatedDateDao(db.accumulatedDateDao());
 
         dataFromDB.getAllDataFromDB();
 
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity
         gridModelArrayList = new ArrayList<GridModel>();
         for(int i = 0; i < categories.length; i++)
         {
-            gridModelArrayList.add(new GridModel(categories[i], btnIconArray[i], ctgColorArray[i], (int)dataFromDB.getAccumulatedExpensesByCategory()[i].sum));
+            gridModelArrayList.add(new GridModel(categories[i], btnIconArray[i], ctgColorArray[i], (int)dataFromDB.getCategory()[i].sum_month));
         }
         adapter = new GridAdapter(this, gridModelArrayList);
         ctgGridView.setAdapter(adapter);
@@ -251,32 +253,38 @@ public class MainActivity extends AppCompatActivity
                     double sum = Double.parseDouble(String.valueOf(tvBottomSheetSum.getText()));
                     String date = String.valueOf(mDate);
 
-                    Expense expense = new Expense();
-                    expense.category = category;
-                    expense.account = account;
-                    expense.description = description;
-                    expense.sum = sum;
-                    expense.date = date;
-                    dataFromDB.getExpenseDao().insertAll(expense);
+                    Transaction transaction = new Transaction();
+                    transaction.type = "Expense";
+                    transaction.category = category;
+                    transaction.account = account;
+                    transaction.description = description;
+                    transaction.sum = sum;
+                    transaction.date = date;
+                    dataFromDB.getTransactionDao().insertAll(transaction);
 
                     double accumulatedSum = 0;
-                    if(dataFromDB.getAccumulatedExpensesByCategory()[btnIndex] == null) {
-                        AccumulatedExpense accumulatedExpense = new AccumulatedExpense();
-                        accumulatedExpense.category = category;
-                        accumulatedExpense.sum = sum;
-                        dataFromDB.getAccumulatedExpenseDao().insertAll(accumulatedExpense);
+                    if(dataFromDB.getCategory()[btnIndex] == null) {
+                        Category accumulatedExpense = new Category();
+                        accumulatedExpense.type = "Expences";
+                        accumulatedExpense.name = category;
+                        accumulatedExpense.year = 2023;
+                        accumulatedExpense.month = 1;
+                        accumulatedExpense.sum_year = sum;
+                        accumulatedExpense.sum_month = sum;
+                        dataFromDB.getCategoryDao().insertAll(accumulatedExpense);
                         accumulatedSum += sum;
                     }
                     else
                     {
-                        dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum += sum;
-                        accumulatedSum = dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum;
-                        dataFromDB.getAccumulatedExpenseDao().updateSum(dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum, category);
+                        dataFromDB.getCategory()[btnIndex].sum_month += sum;
+                        dataFromDB.getCategory()[btnIndex].sum_year += sum;
+                        accumulatedSum = dataFromDB.getCategory()[btnIndex].sum_month;
+                        dataFromDB.getCategoryDao().updateSumMonth(dataFromDB.getCategory()[btnIndex].sum_month, category);
                     }
 
                     updatePieChart(pieChart, pieDataSet, btnIndex, accumulatedSum);
 
-                    gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getAccumulatedExpensesByCategory()[btnIndex].sum);
+                    gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategory()[btnIndex].sum_month);
                     adapter.notifyDataSetChanged();
                     ctgGridView.invalidate();
 
@@ -293,11 +301,11 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    ArrayList<PieEntry> pieChartCategories(AccumulatedExpense[] accumulatedExpensesByCategory){
+    ArrayList<PieEntry> pieChartCategories(Category[] categories){
         ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
         for(int i = 0; i < 12; i++)     // number of categories ???
         {
-            pieChartCtg.add(new PieEntry((int)accumulatedExpensesByCategory[i].sum, ""));
+            pieChartCtg.add(new PieEntry((int)categories[i].sum_month, ""));
         }
         return pieChartCtg;
     }
@@ -305,7 +313,7 @@ public class MainActivity extends AppCompatActivity
     void setupPieChart(DataFromDB dataFromDB, int[] colorClassArray)
     {
         pieChart = findViewById(R.id.pieChart);
-        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB.getAccumulatedExpensesByCategory()), "label");
+        pieDataSet = new PieDataSet(pieChartCategories(dataFromDB.getCategory()), "label");
         pieDataSet.setColors(colorClassArray);
 
         PieData pieData = new PieData(pieDataSet);
