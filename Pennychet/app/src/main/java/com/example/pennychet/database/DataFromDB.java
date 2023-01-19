@@ -6,17 +6,24 @@ public class DataFromDB {
 
 //    private String mCurrencyType = "UAH";
 
-    private String[] categoriesNames;
-    private List<Category> categories;
+    private String[] categoriesNamesExpense;
+    private String[] categoriesNamesIncome;
+    private List<Category> categoriesExpense;
+    private List<Category> categoriesIncome;
 
     private TransactionDao transactionDao;
     private AccountDao accountDao;
     private AccumulatedDateDao accumulatedDateDao;
     private CategoryDao categoryDao;
 
-    public List<Category> getCategories()
+    public List<Category> getCategoriesExpense()
     {
-        return categories;
+        return categoriesExpense;
+    }
+
+    public List<Category> getCategoriesIncome()
+    {
+        return categoriesIncome;
     }
 
     public void setTransactionDao(TransactionDao transactionDao)
@@ -45,25 +52,42 @@ public class DataFromDB {
 
     public void getAllCategory()
     {
-        categories = categoryDao.getAll();
-        if (categories.isEmpty())
+        categoriesExpense = categoryDao.getAllByType("Expense");
+        if (categoriesExpense.isEmpty())
         {
-            for (String categoriesName : categoriesNames) {
+            for (String categoriesName : categoriesNamesExpense) {
                 Category category = new Category();
-                category.type = "Expenses";     // ???
+                category.type = "Expense";     // ???
                 category.name = categoriesName;
                 category.year = 2023;           // ???
                 category.month = 1;             // ???
                 category.sum_year = 0;
                 category.sum_month = 0;
-                categories.add(category);
+                categoriesExpense.add(category);
+                categoryDao.insertAll(category);
+            }
+        }
+
+        categoriesIncome = categoryDao.getAllByType("Income");
+        if (categoriesIncome.isEmpty())
+        {
+            for (String categoriesName : categoriesNamesIncome) {
+                Category category = new Category();
+                category.type = "Income";     // ???
+                category.name = categoriesName;
+                category.year = 2023;           // ???
+                category.month = 1;             // ???
+                category.sum_year = 0;
+                category.sum_month = 0;
+                categoriesIncome.add(category);
                 categoryDao.insertAll(category);
             }
         }
     }
 
-    public DataFromDB(String[] categories)
+    public DataFromDB(String[] categoriesExpense, String[] categoriesIncome )
     {
-        categoriesNames = categories;
+        categoriesNamesExpense = categoriesExpense;
+        categoriesNamesIncome = categoriesIncome;
     }
 }

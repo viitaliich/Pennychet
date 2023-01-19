@@ -16,13 +16,42 @@
         tools:context=".MainActivity"
         >
 
+        <Button
+            android:id="@+id/pieChartButton"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/transparent"
+            android:elevation="5dp"
+            android:padding="5dp"
+            android:text="Expenses"
+            android:textAlignment="center"
+            >
+        </Button>
+
+        <TextView
+            android:id="@+id/pieChartText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="95dp"
+            android:elevation="10dp"
+            android:padding="5dp"
+            android:text="Expenses"
+            >
+        </TextView>
+
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_gravity="fill"
-            android:layout_marginBottom="50dp"
-            android:elevation="5dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:padding="5dp" />
 
         <com.example.pennychet.ui.ExpandableHeightGridView
