@@ -1,11 +1,8 @@
 package com.example.pennychet;
 
-import static android.os.SystemClock.sleep;
-
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -98,6 +95,17 @@ public class MainActivity extends AppCompatActivity
             R.drawable.ic_outline_attach_money_24,
     };
 
+    int[] ctgColorArrayExpense;
+    int[] ctgColorArrayIncome;
+
+    String[] categoriesExpense;
+    String[] categoriesIncome;
+
+    // Swap categories button
+    Button swapBtn;
+    TextView swapBtnText;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,7 +113,7 @@ public class MainActivity extends AppCompatActivity
 
         mState = State.EXPENSE;
 
-        int[] ctgColorArrayExpense = new int[]{
+        ctgColorArrayExpense = new int[]{
                 getResources().getColor(R.color.ctg1),
                 getResources().getColor(R.color.ctg2),
                 getResources().getColor(R.color.ctg3),
@@ -120,13 +128,13 @@ public class MainActivity extends AppCompatActivity
                 getResources().getColor(R.color.ctg12),
         };
 
-        int[] ctgColorArrayIncome = new int[]{
+        ctgColorArrayIncome = new int[]{
                 getResources().getColor(R.color.ctg1),
                 getResources().getColor(R.color.ctg2),
         };
 
-        String[] categoriesExpense = getResources().getStringArray(R.array.categoriesExpense);
-        String[] categoriesIncome = getResources().getStringArray(R.array.categoriesIncome);
+        categoriesExpense = getResources().getStringArray(R.array.categoriesExpense);
+        categoriesIncome = getResources().getStringArray(R.array.categoriesIncome);
 
         // DB
         // allowMainThreadQueries() not recommended ???
@@ -143,9 +151,11 @@ public class MainActivity extends AppCompatActivity
 
         dataFromDB.getAllCategory();
 
-        pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesExpense()), "label");
-        pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesIncome()), "label");
+//        pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesExpense()), "label");
+//        pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesIncome()), "label");
 
+        pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB, State.EXPENSE), "label");
+        pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB, State.INCOME), "label");
 
 //        AsyncTask.execute(() -> dataFromDB.getAllCategory());
 
@@ -169,46 +179,19 @@ public class MainActivity extends AppCompatActivity
         });
 
         // PieChart
-        if(mState == State.EXPENSE)
-            setupPieChart(dataFromDB, ctgColorArrayExpense, pieDataSetExpense);
-        else setupPieChart(dataFromDB, ctgColorArrayIncome, pieDataSetIncome);
+        setupPieChart(mState);
         pieChart.invalidate();
 
         // Income <-> Expense button
 
-        Button swapBtn = findViewById(R.id.pieChartButton);
-        TextView swapBtnText = findViewById(R.id.pieChartText);
+        swapBtn = findViewById(R.id.pieChartButton);
+        swapBtnText = findViewById(R.id.pieChartText);
         swapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gridModelArrayList.clear();
-                if(mState == State.EXPENSE)
-                {
-                    mState = State.INCOME;
-                    swapBtnText.setText("Income");
-                    for(int i = 0; i < categoriesIncome.length; i++)
-                    {
-                        gridModelArrayList.add(new GridModel(categoriesIncome[i], btnIconArrayIncome[i], ctgColorArrayIncome[i], (int)dataFromDB.getCategoriesIncome().get(i).sum_month));
-                    }
-                    setupPieChart(dataFromDB, ctgColorArrayIncome, pieDataSetIncome);
-
-                }
-                else
-                {
-                    mState = State.EXPENSE;
-                    swapBtnText.setText("Expense");
-                    for(int i = 0; i < categoriesExpense.length; i++)
-                    {
-                        gridModelArrayList.add(new GridModel(categoriesExpense[i], btnIconArrayExpense[i], ctgColorArrayExpense[i], (int)dataFromDB.getCategoriesExpense().get(i).sum_month));
-                    }
-                    setupPieChart(dataFromDB, ctgColorArrayExpense, pieDataSetExpense);
-
-                }
-                adapter = new GridAdapter(getApplicationContext(), gridModelArrayList);
-                ctgGridView.setAdapter(adapter);
+                swapCategoriesButton(dataFromDB);
             }
         });
-
 
         // Drawer Layout
         DrawerLayout drawerLayout;
@@ -264,6 +247,34 @@ public class MainActivity extends AppCompatActivity
                 ).show());
     }
 
+    private void swapCategoriesButton(DataFromDB dataFromDB)
+    {
+        gridModelArrayList.clear();
+        if(mState == State.EXPENSE)
+        {
+            mState = State.INCOME;
+            swapBtnText.setText("Income");
+
+            for(int i = 0; i < categoriesIncome.length; i++)
+            {
+                gridModelArrayList.add(new GridModel(categoriesIncome[i], btnIconArrayIncome[i], ctgColorArrayIncome[i], (int)dataFromDB.getCategoriesIncome().get(i).sum_month));
+            }
+        }
+        else
+        {
+            mState = State.EXPENSE;
+            swapBtnText.setText("Expense");
+
+            for(int i = 0; i < categoriesExpense.length; i++)
+            {
+                gridModelArrayList.add(new GridModel(categoriesExpense[i], btnIconArrayExpense[i], ctgColorArrayExpense[i], (int)dataFromDB.getCategoriesExpense().get(i).sum_month));
+            }
+        }
+        setupPieChart(mState);
+        adapter = new GridAdapter(getApplicationContext(), gridModelArrayList);
+        ctgGridView.setAdapter(adapter);
+    }
+
     // BottomSheet
     private void showBottomSheetDialog(DataFromDB dataFromDB, int btnIndex) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -274,14 +285,10 @@ public class MainActivity extends AppCompatActivity
         // Categories drop down menu
         AutoCompleteTextView autoCompleteTextViewCategoty = bottomSheetDialog.findViewById(R.id.actvCategory);
         String[] categories;
-        if(mState == State.EXPENSE)
-        {
-            categories = getResources().getStringArray(R.array.categoriesExpense);
-        }
-        else
-        {
-            categories = getResources().getStringArray(R.array.categoriesIncome);
-        }
+
+        if(mState == State.EXPENSE) categories = categoriesExpense;
+        else categories = categoriesIncome;
+
         List<String> categoriesList = Arrays.asList(categories);
         autoCompleteTextViewCategoty.setText(categoriesList.get(btnIndex));
         ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
@@ -356,7 +363,6 @@ public class MainActivity extends AppCompatActivity
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
                         updatePieChart(pieChart, pieDataSetExpense, btnIndex, accumulatedSum);
                         gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategoriesExpense().get(btnIndex).sum_month);
-
                     }
                     else
                     {
@@ -366,7 +372,6 @@ public class MainActivity extends AppCompatActivity
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
                         updatePieChart(pieChart, pieDataSetIncome, btnIndex, accumulatedSum);
                         gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategoriesIncome().get(btnIndex).sum_month);
-
                     }
 
                     adapter.notifyDataSetChanged();
@@ -385,8 +390,14 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    ArrayList<PieEntry> pieChartCategories(List<Category> categories){
+    ArrayList<PieEntry> pieChartCategories(DataFromDB dataFromDB, State state){
         ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
+        List<Category> categories;
+        if(state == State.EXPENSE)
+            categories = dataFromDB.getCategoriesExpense();
+        else
+            categories = dataFromDB.getCategoriesIncome();
+
         for(int i = 0; i < categories.size(); i++)
         {
             pieChartCtg.add(new PieEntry((int)categories.get(i).sum_month, ""));
@@ -394,8 +405,20 @@ public class MainActivity extends AppCompatActivity
         return pieChartCtg;
     }
 
-    void setupPieChart(DataFromDB dataFromDB, int[] colorClassArray, PieDataSet pieDataSet)
+    void setupPieChart(State state)
     {
+        int[] colorClassArray;
+        PieDataSet pieDataSet;
+
+        if(state == State.EXPENSE) {
+            colorClassArray = ctgColorArrayExpense;
+            pieDataSet = pieDataSetExpense;
+        }
+        else {
+            colorClassArray = ctgColorArrayIncome;
+            pieDataSet = pieDataSetIncome;
+        }
+
         pieChart = findViewById(R.id.pieChart);
         pieDataSet.setColors(colorClassArray);
 
