@@ -10,8 +10,8 @@ public class Account {
     public int id;
 
     @ColumnInfo(name = "name")
-    public String account;
+    public String name;
 
-    @ColumnInfo(name = "sum")
-    public double sum;
+    @ColumnInfo(name = "init_sum")
+    public double init_sum;
 }

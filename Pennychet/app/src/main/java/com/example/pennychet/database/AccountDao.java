@@ -22,7 +22,10 @@ public interface AccountDao {
     void insert(Account account);
 
     @Query("UPDATE account SET name= :new_name WHERE name LIKE :account")
-    void updateName(double new_name, String account);
+    void updateName(String new_name, String account);
+
+    @Query("UPDATE account SET init_sum= :new_sum WHERE name LIKE :account")
+    void updateInitSum(double new_sum, String account);
 
     @Delete
     void deleteAll(Transaction... category);

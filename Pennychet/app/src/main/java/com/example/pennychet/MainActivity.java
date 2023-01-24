@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.room.Room;
 
+import com.example.pennychet.database.Account;
 import com.example.pennychet.database.AppDatabase;
 import com.example.pennychet.database.Category;
 import com.example.pennychet.database.DataFromDB;
@@ -52,9 +54,9 @@ public class MainActivity extends AppCompatActivity
     {
         EXPENSE,
         INCOME,
+        ACCOUNT
     }
     State mState;
-
 
     // Calendar button inside category
     Button btnPickDate;
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity
     PieChart pieChart;
     PieDataSet pieDataSetExpense;
     PieDataSet pieDataSetIncome;
+    PieDataSet pieDataSetAccount;
 
     // Categories buttons grid
     ArrayList<GridModel> gridModelArrayList;
@@ -95,16 +98,22 @@ public class MainActivity extends AppCompatActivity
             R.drawable.ic_outline_attach_money_24,
     };
 
+    int[] btnIconArrayAccount = new int[] {
+            R.drawable.ic_outline_attach_money_24,
+            R.drawable.ic_outline_attach_money_24,
+    };
+
     int[] ctgColorArrayExpense;
     int[] ctgColorArrayIncome;
+    int[] ctgColorArrayAccount;
 
     String[] categoriesExpense;
     String[] categoriesIncome;
+    String[] categoriesAccount;
 
     // Swap categories button
     Button swapBtn;
     TextView swapBtnText;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,12 +142,18 @@ public class MainActivity extends AppCompatActivity
                 getResources().getColor(R.color.ctg2),
         };
 
+        ctgColorArrayAccount = new int[]{
+                getResources().getColor(R.color.ctg11),
+                getResources().getColor(R.color.ctg12),
+        };
+
         categoriesExpense = getResources().getStringArray(R.array.categoriesExpense);
         categoriesIncome = getResources().getStringArray(R.array.categoriesIncome);
+        categoriesAccount = getResources().getStringArray(R.array.accounts);
 
         // DB
         // allowMainThreadQueries() not recommended ???
-        DataFromDB dataFromDB = new DataFromDB(categoriesExpense, categoriesIncome);
+        DataFromDB dataFromDB = new DataFromDB(categoriesExpense, categoriesIncome, categoriesAccount);
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "Transactions").allowMainThreadQueries().build();
@@ -151,11 +166,9 @@ public class MainActivity extends AppCompatActivity
 
         dataFromDB.getAllCategory();
 
-//        pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesExpense()), "label");
-//        pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB.getCategoriesIncome()), "label");
-
         pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB, State.EXPENSE), "label");
         pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB, State.INCOME), "label");
+        pieDataSetAccount = new PieDataSet(pieChartCategories(dataFromDB, State.ACCOUNT), "label");
 
 //        AsyncTask.execute(() -> dataFromDB.getAllCategory());
 
@@ -174,7 +187,10 @@ public class MainActivity extends AppCompatActivity
         ctgGridView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showBottomSheetDialog(dataFromDB, position);
+                if(mState == State.ACCOUNT)
+                    showBottomSheetAccount(dataFromDB, position);
+                else
+                    showBottomSheetCategory(dataFromDB, position);
             }
         });
 
@@ -260,7 +276,17 @@ public class MainActivity extends AppCompatActivity
                 gridModelArrayList.add(new GridModel(categoriesIncome[i], btnIconArrayIncome[i], ctgColorArrayIncome[i], (int)dataFromDB.getCategoriesIncome().get(i).sum_month));
             }
         }
-        else
+        else if(mState == State.INCOME)
+        {
+            mState = State.ACCOUNT;
+            swapBtnText.setText("Accounts");
+
+            for(int i = 0; i < categoriesAccount.length; i++)
+            {
+                gridModelArrayList.add(new GridModel(categoriesAccount[i], btnIconArrayAccount[i], ctgColorArrayAccount[i], (int)dataFromDB.getCategoriesAccounts().get(i).init_sum));
+            }
+        }
+        else if(mState == State.ACCOUNT)
         {
             mState = State.EXPENSE;
             swapBtnText.setText("Expense");
@@ -275,10 +301,18 @@ public class MainActivity extends AppCompatActivity
         ctgGridView.setAdapter(adapter);
     }
 
-    // BottomSheet
-    private void showBottomSheetDialog(DataFromDB dataFromDB, int btnIndex) {
+    boolean findStringElement(String[] array, String element)
+    {
+        for (String s : array) {
+            if (element.equals(s)) return true;
+        }
+        return false;
+    }
+
+    // BottomSheet Category
+    private void showBottomSheetCategory(DataFromDB dataFromDB, int btnIndex) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_main);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_category);
         bottomSheetDialog.setCanceledOnTouchOutside(false);
         bottomSheetDialog.show();
 
@@ -328,11 +362,13 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 if(tvBottomSheetSum.getText().toString().isEmpty())
                 {
+                    tfBottomSheetSum.setErrorEnabled(true);
                     tfBottomSheetSum.setError("Required field");
                 }
                 else
                 {
                     tfBottomSheetSum.setError(null);
+                    tfBottomSheetSum.setErrorEnabled(false);
 
                     // DB
                     String category = String.valueOf(autoCompleteTextViewCategoty.getText());
@@ -354,24 +390,26 @@ public class MainActivity extends AppCompatActivity
                     transaction.date = date;
                     dataFromDB.getTransactionDao().insertAll(transaction);
 
+                    int indexCategory = adapterCategory.getPosition(autoCompleteTextViewCategoty.getText().toString());
+
                     double accumulatedSum;
                     if(mState == State.EXPENSE)
                     {
-                        dataFromDB.getCategoriesExpense().get(btnIndex).sum_month += sum;
-                        dataFromDB.getCategoriesExpense().get(btnIndex).sum_year += sum;
-                        accumulatedSum = dataFromDB.getCategoriesExpense().get(btnIndex).sum_month;
+                        dataFromDB.getCategoriesExpense().get(indexCategory).sum_month += sum;
+                        dataFromDB.getCategoriesExpense().get(indexCategory).sum_year += sum;
+                        accumulatedSum = dataFromDB.getCategoriesExpense().get(indexCategory).sum_month;
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
-                        updatePieChart(pieChart, pieDataSetExpense, btnIndex, accumulatedSum);
-                        gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategoriesExpense().get(btnIndex).sum_month);
+                        updatePieChart(pieChart, pieDataSetExpense, indexCategory, accumulatedSum);
+                        gridModelArrayList.get(indexCategory).setSum((int)dataFromDB.getCategoriesExpense().get(indexCategory).sum_month);
                     }
                     else
                     {
-                        dataFromDB.getCategoriesIncome().get(btnIndex).sum_month += sum;
-                        dataFromDB.getCategoriesIncome().get(btnIndex).sum_year += sum;
-                        accumulatedSum = dataFromDB.getCategoriesIncome().get(btnIndex).sum_month;
+                        dataFromDB.getCategoriesIncome().get(indexCategory).sum_month += sum;
+                        dataFromDB.getCategoriesIncome().get(indexCategory).sum_year += sum;
+                        accumulatedSum = dataFromDB.getCategoriesIncome().get(indexCategory).sum_month;
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
-                        updatePieChart(pieChart, pieDataSetIncome, btnIndex, accumulatedSum);
-                        gridModelArrayList.get(btnIndex).setSum((int)dataFromDB.getCategoriesIncome().get(btnIndex).sum_month);
+                        updatePieChart(pieChart, pieDataSetIncome, indexCategory, accumulatedSum);
+                        gridModelArrayList.get(indexCategory).setSum((int)dataFromDB.getCategoriesIncome().get(indexCategory).sum_month);
                     }
 
                     adapter.notifyDataSetChanged();
@@ -390,17 +428,131 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    // BottomSheet Account
+    private void showBottomSheetAccount(DataFromDB dataFromDB, int btnIndex) {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_account);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        bottomSheetDialog.show();
+
+        // Accounts drop down menu
+        AutoCompleteTextView autoCompleteTextViewAccount = bottomSheetDialog.findViewById(R.id.actvAccount);
+        String[] accounts = getResources().getStringArray(R.array.accounts);
+        List<String> accountsList = Arrays.asList(accounts);
+        autoCompleteTextViewAccount.setText(accountsList.get(btnIndex));
+        ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
+                this, R.layout.drop_down_item, accountsList);
+        autoCompleteTextViewAccount.setAdapter(adapterAccount);
+
+        // Transfer accounts drop down menu
+        AutoCompleteTextView autoCompleteTextViewAccountDestination = bottomSheetDialog.findViewById(R.id.actvAccountDestination);
+        String[] destinationAccounts = getResources().getStringArray(R.array.accounts);
+        List<String> destinationAccountsList = Arrays.asList(destinationAccounts);
+        autoCompleteTextViewAccountDestination.setText(destinationAccountsList.get(0));
+        ArrayAdapter<String> adapterDestinationAccount = new ArrayAdapter<>(
+                this, R.layout.drop_down_item, destinationAccountsList);
+        autoCompleteTextViewAccountDestination.setAdapter(adapterDestinationAccount);
+
+        TextView tvBottomSheetInitSum = bottomSheetDialog.findViewById(R.id.textViewBottomSheetInitSum);
+
+        TextView tvBottomSheetTransferSum = bottomSheetDialog.findViewById(R.id.textViewBottomSheetTransferSum);
+        TextInputLayout tfBottomSheetTransferSum = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetTranferSum);
+
+        Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
+        Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
+
+        TextInputLayout textFieldBottomSheetAccount = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetAccount);
+        TextInputLayout textFieldBottomSheetAccountDestination = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetAccountDestination);
+
+        int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
+        tvBottomSheetInitSum.setText(String.valueOf(dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum));
+
+        // Transfer
+        Button btnTransfer = bottomSheetDialog.findViewById(R.id.btnBottomSheetTransfer);
+        btnTransfer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (autoCompleteTextViewAccountDestination.getText().toString().equals(autoCompleteTextViewAccount.getText().toString())) {
+                    textFieldBottomSheetAccountDestination.setErrorEnabled(true);
+                    textFieldBottomSheetAccountDestination.setError("Account and Destination account must not be the same");
+                }
+                else if (tvBottomSheetTransferSum.getText().toString().isEmpty())
+                {
+                    tfBottomSheetTransferSum.setErrorEnabled(true);
+                    tfBottomSheetTransferSum.setError("Enter transfer sum");
+                }
+                else {
+                    textFieldBottomSheetAccountDestination.setError(null);
+                    textFieldBottomSheetAccountDestination.setErrorEnabled(false);
+                    tfBottomSheetTransferSum.setError(null);
+                    tfBottomSheetTransferSum.setErrorEnabled(false);
+
+                    Toast.makeText(MainActivity.this, "Transfer", Toast.LENGTH_SHORT
+                    ).show();
+
+                    bottomSheetDialog.dismiss();
+                }
+            }
+        });
+
+        btnBottomSheetOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
+
+                // DB
+                double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum;
+
+                if (!tvBottomSheetInitSum.getText().toString().isEmpty() &&
+                        !tvBottomSheetInitSum.getText().toString().equals(String.valueOf(init_sum))) {
+
+                    init_sum = Double.parseDouble(tvBottomSheetInitSum.getText().toString());
+
+                    dataFromDB.getAccountDao().updateInitSum(init_sum, dataFromDB.getCategoriesAccounts().get(accountIndex).name);
+                    dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum = init_sum;
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, init_sum);
+                    gridModelArrayList.get(accountIndex).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
+                }
+                adapter.notifyDataSetChanged();
+                ctgGridView.invalidate();
+
+                bottomSheetDialog.dismiss();
+            }
+        });
+
+        btnBottomSheetCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetDialog.dismiss();
+            }
+        });
+    }
+
     ArrayList<PieEntry> pieChartCategories(DataFromDB dataFromDB, State state){
         ArrayList<PieEntry> pieChartCtg = new ArrayList<>();
         List<Category> categories;
-        if(state == State.EXPENSE)
-            categories = dataFromDB.getCategoriesExpense();
-        else
-            categories = dataFromDB.getCategoriesIncome();
-
-        for(int i = 0; i < categories.size(); i++)
+        List<Account> accounts;
+        if(state == State.ACCOUNT)
         {
-            pieChartCtg.add(new PieEntry((int)categories.get(i).sum_month, ""));
+            accounts = dataFromDB.getCategoriesAccounts();
+            for(int i = 0; i < accounts.size(); i++)
+            {
+                pieChartCtg.add(new PieEntry((int)accounts.get(i).init_sum, ""));
+            }
+        }
+        else
+        {
+            if(state == State.EXPENSE)
+                categories = dataFromDB.getCategoriesExpense();
+            else
+                categories = dataFromDB.getCategoriesIncome();
+
+            for(int i = 0; i < categories.size(); i++)
+            {
+                pieChartCtg.add(new PieEntry((int)categories.get(i).sum_month, ""));
+            }
         }
         return pieChartCtg;
     }
@@ -414,9 +566,14 @@ public class MainActivity extends AppCompatActivity
             colorClassArray = ctgColorArrayExpense;
             pieDataSet = pieDataSetExpense;
         }
-        else {
+        else if(state == State.INCOME) {
             colorClassArray = ctgColorArrayIncome;
             pieDataSet = pieDataSetIncome;
+        }
+        else
+        {
+            colorClassArray = ctgColorArrayAccount;
+            pieDataSet = pieDataSetAccount;
         }
 
         pieChart = findViewById(R.id.pieChart);

@@ -3,34 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_sheet_main"
     android:layout_width="match_parent"
-    android:layout_height="440dp"
+    android:layout_height="500dp"
     android:background="@color/white"
     android:orientation="vertical"
     app:behavior_hideable="true"
     app:behavior_peekHeight="80dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:id="@+id/textFieldBottomSheetCategory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
-        android:hint="Category"
-        app:startIconDrawable="@drawable/ic_outline_category_24"
-        >
-
-        <AutoCompleteTextView
-            android:id="@+id/actvCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:text="ddd"
-            />
-
-    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -55,41 +33,19 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:id="@+id/textFieldBottomSheetDescription"
+        android:id="@+id/textFieldBottomSheetInitSum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginTop="10dp"
-        android:hint="Enter description"
-        app:startIconDrawable="@drawable/ic_outline_description_24"
-        app:endIconMode="clear_text"
-        >
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textViewBottomSheetDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:id="@+id/textFieldBottomSheetSum"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
-        android:hint="Enter sum"
+        android:hint="Initial sum"
         app:startIconDrawable="@drawable/ic_outline_attach_money_24"
         app:endIconMode="clear_text"
-        app:errorEnabled="true"
         >
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textViewBottomSheetSum"
+            android:id="@+id/textViewBottomSheetInitSum"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"
@@ -97,15 +53,75 @@
             />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/btnBottomSheetPickDate"
+    <TextView
+        android:id="@+id/textViewBottomSheetTransfer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:elevation="10dp"
+        android:padding="5dp"
+        android:textSize="18sp"
+        android:text="Transfer money to another account"
+        >
+    </TextView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:id="@+id/textFieldBottomSheetTranferSum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginTop="10dp"
-        android:text="Pick Date"
-        app:icon="@drawable/ic_outline_calendar_month_24"
+        android:hint="Transfer sum"
+        app:startIconDrawable="@drawable/ic_outline_attach_money_24"
+        app:endIconMode="clear_text"
+        app:errorEnabled="false"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textViewBottomSheetTransferSum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:inputType="numberDecimal"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/textFieldBottomSheetAccountDestination"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:hint="Destination account"
+        app:startIconDrawable="@drawable/ic_outline_account_balance_wallet_24"
+        app:errorEnabled="false"
+        >
+
+        <AutoCompleteTextView
+            android:id="@+id/actvAccountDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btnBottomSheetTransfer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:text="Transfer"
+        app:icon="@drawable/ic_outline_attach_money_24"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         />
 

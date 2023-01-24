@@ -8,8 +8,10 @@ public class DataFromDB {
 
     private String[] categoriesNamesExpense;
     private String[] categoriesNamesIncome;
+    private String[] accountsNames;
     private List<Category> categoriesExpense;
     private List<Category> categoriesIncome;
+    private List<Account> categoriesAccounts;
 
     private TransactionDao transactionDao;
     private AccountDao accountDao;
@@ -24,6 +26,11 @@ public class DataFromDB {
     public List<Category> getCategoriesIncome()
     {
         return categoriesIncome;
+    }
+
+    public List<Account> getCategoriesAccounts()
+    {
+        return categoriesAccounts;
     }
 
     public void setTransactionDao(TransactionDao transactionDao)
@@ -52,6 +59,19 @@ public class DataFromDB {
 
     public void getAllCategory()
     {
+        categoriesAccounts = accountDao.getAll();
+        if(categoriesAccounts.isEmpty())
+        {
+            for(String accountName : accountsNames)
+            {
+                Account account = new Account();
+                account.name = accountName;
+                account.init_sum = 0;        // set saved initial value
+                categoriesAccounts.add(account);
+                accountDao.insertAll(account);
+            }
+        }
+
         categoriesExpense = categoryDao.getAllByType("Expense");
         if (categoriesExpense.isEmpty())
         {
@@ -85,9 +105,10 @@ public class DataFromDB {
         }
     }
 
-    public DataFromDB(String[] categoriesExpense, String[] categoriesIncome )
+    public DataFromDB(String[] categoriesExpense, String[] categoriesIncome, String[] categoriesAccounts)
     {
         categoriesNamesExpense = categoriesExpense;
         categoriesNamesIncome = categoriesIncome;
+        accountsNames = categoriesAccounts;
     }
 }
