@@ -360,6 +360,8 @@ public class MainActivity extends AppCompatActivity
         btnBottomSheetOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tfBottomSheetSum.setErrorEnabled(false);
+
                 if(tvBottomSheetSum.getText().toString().isEmpty())
                 {
                     tfBottomSheetSum.setErrorEnabled(true);
@@ -461,7 +463,6 @@ public class MainActivity extends AppCompatActivity
         Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
         Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
 
-        TextInputLayout textFieldBottomSheetAccount = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetAccount);
         TextInputLayout textFieldBottomSheetAccountDestination = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetAccountDestination);
 
         int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
@@ -472,6 +473,14 @@ public class MainActivity extends AppCompatActivity
         btnTransfer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
+                int accountIndexDestination = adapterAccount.getPosition(autoCompleteTextViewAccountDestination.getText().toString());
+
+                Log.i("@@@", String.valueOf(accountIndex));
+                Log.i("@@@", String.valueOf(accountIndexDestination));
+
+                textFieldBottomSheetAccountDestination.setErrorEnabled(false);
+                tfBottomSheetTransferSum.setErrorEnabled(false);
 
                 if (autoCompleteTextViewAccountDestination.getText().toString().equals(autoCompleteTextViewAccount.getText().toString())) {
                     textFieldBottomSheetAccountDestination.setErrorEnabled(true);
@@ -488,7 +497,28 @@ public class MainActivity extends AppCompatActivity
                     tfBottomSheetTransferSum.setError(null);
                     tfBottomSheetTransferSum.setErrorEnabled(false);
 
-                    Toast.makeText(MainActivity.this, "Transfer", Toast.LENGTH_SHORT
+
+                    double transfer_sum = Double.parseDouble(tvBottomSheetTransferSum.getText().toString());
+                    double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum;
+                    double init_sum_dest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum;
+
+                    dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum = init_sum - transfer_sum;
+                    dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum = init_sum_dest + transfer_sum;
+
+                    dataFromDB.getAccountDao().updateInitSum(dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum,
+                            dataFromDB.getCategoriesAccounts().get(accountIndex).name);
+                    dataFromDB.getAccountDao().updateInitSum(dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum,
+                            dataFromDB.getCategoriesAccounts().get(accountIndexDestination).name);
+
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndexDestination, dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum);
+                    gridModelArrayList.get(accountIndex).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
+                    gridModelArrayList.get(accountIndexDestination).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum);
+
+                    adapter.notifyDataSetChanged();
+                    ctgGridView.invalidate();
+
+                    Toast.makeText(MainActivity.this, "Transfer completed", Toast.LENGTH_SHORT
                     ).show();
 
                     bottomSheetDialog.dismiss();
