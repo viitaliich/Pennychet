@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import com.example.pennychet.database.Account;
@@ -29,6 +31,9 @@ import com.example.pennychet.database.Transaction;
 import com.example.pennychet.ui.ExpandableHeightGridView;
 import com.example.pennychet.ui.GridAdapter;
 import com.example.pennychet.ui.GridModel;
+import com.example.pennychet.ui.listAdapter;
+import com.example.pennychet.ui.listClickListener;
+import com.example.pennychet.ui.listData;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -49,6 +54,13 @@ public class MainActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener {
 
     private static final String TAG = "MainActivity";
+
+
+    listAdapter listAdapter;
+    RecyclerView recyclerView;
+    listClickListener listener;
+
+
 
     enum State
     {
@@ -116,9 +128,56 @@ public class MainActivity extends AppCompatActivity
     TextView swapBtnText;
 
     @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+    }
+
+    // Sample data for RecyclerView
+    private List<listData> getData()
+    {
+        List<listData> list = new ArrayList<>();
+        list.add(new listData("First Exam",
+                "May 23, 2015",
+                "Best Of Luck"));
+        list.add(new listData("Second Exam",
+                "June 09, 2015",
+                "b of l"));
+        list.add(new listData("My Test Exam",
+                "April 27, 2017",
+                "This is testing exam .."));
+
+        return list;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+        List<listData> list = new ArrayList<>();
+        list = getData();
+
+        recyclerView
+                = (RecyclerView)findViewById(
+                R.id.recyclerView);
+        listener = new listClickListener() {
+            @Override
+            public void click(int index){
+                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_LONG).show();
+            }
+        };
+        listAdapter
+                = new listAdapter(
+                list, getApplication(),listener);
+        recyclerView.setAdapter(listAdapter);
+        recyclerView.setLayoutManager(
+                new LinearLayoutManager(MainActivity.this));
+
+
+
 
         mState = State.EXPENSE;
 
