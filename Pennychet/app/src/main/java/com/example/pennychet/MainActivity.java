@@ -31,9 +31,9 @@ import com.example.pennychet.database.Transaction;
 import com.example.pennychet.ui.ExpandableHeightGridView;
 import com.example.pennychet.ui.GridAdapter;
 import com.example.pennychet.ui.GridModel;
-import com.example.pennychet.ui.listAdapter;
-import com.example.pennychet.ui.listClickListener;
-import com.example.pennychet.ui.listData;
+import com.example.pennychet.ui.ListAdapter;
+import com.example.pennychet.ui.ListClickListener;
+import com.example.pennychet.ui.ListData;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -56,9 +56,9 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
 
-    listAdapter listAdapter;
+    ListAdapter listAdapter;
     RecyclerView recyclerView;
-    listClickListener listener;
+    ListClickListener listener;
 
 
 
@@ -134,16 +134,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Sample data for RecyclerView
-    private List<listData> getData()
+    private List<ListData> getData()
     {
-        List<listData> list = new ArrayList<>();
-        list.add(new listData("First Exam",
+        List<ListData> list = new ArrayList<>();
+        list.add(new ListData("First Exam",
                 "May 23, 2015",
                 "Best Of Luck"));
-        list.add(new listData("Second Exam",
+        list.add(new ListData("Second Exam",
                 "June 09, 2015",
                 "b of l"));
-        list.add(new listData("My Test Exam",
+        list.add(new ListData("My Test Exam",
                 "April 27, 2017",
                 "This is testing exam .."));
 
@@ -157,24 +157,18 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        List<listData> list = new ArrayList<>();
-        list = getData();
+        List<ListData> list = getData();
 
-        recyclerView
-                = (RecyclerView)findViewById(
-                R.id.recyclerView);
-        listener = new listClickListener() {
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        listener = new ListClickListener() {
             @Override
             public void click(int index){
-                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
             }
         };
-        listAdapter
-                = new listAdapter(
-                list, getApplication(),listener);
+        listAdapter = new ListAdapter(list, getApplication(),listener);
         recyclerView.setAdapter(listAdapter);
-        recyclerView.setLayoutManager(
-                new LinearLayoutManager(MainActivity.this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
 
 

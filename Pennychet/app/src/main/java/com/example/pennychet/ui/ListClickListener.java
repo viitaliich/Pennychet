@@ -1,6 +1,6 @@
 package com.example.pennychet.ui;
 
-public interface listClickListener {
+public interface ListClickListener {
 
     void click(int index);
 

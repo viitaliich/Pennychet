@@ -1,11 +1,11 @@
 package com.example.pennychet.ui;
 
-public class listData {
+public class ListData {
     String name;
     String date;
     String message;
 
-    public listData(String name,
+    public ListData(String name,
                     String date,
                     String message)
     {
