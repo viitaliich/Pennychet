@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pennychet.R;
 
-import java.util.Collections;
 import java.util.List;
 
 public class ListAdapter extends RecyclerView.Adapter<ListViewHolder> {
@@ -45,9 +44,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListViewHolder> {
     onBindViewHolder(final ListViewHolder viewHolder, final int position)
     {
         final int index = viewHolder.getAdapterPosition();
-        viewHolder.examName.setText(list.get(position).name);
-        viewHolder.examDate.setText(list.get(position).date);
-        viewHolder.examMessage.setText(list.get(position).message);
+        viewHolder.tvCategory.setText(list.get(position).category);
+        viewHolder.tvAccount.setText(list.get(position).account);
+        viewHolder.tvDate.setText(list.get(position).date);
+        viewHolder.tvDescription.setText(list.get(position).description);
+        viewHolder.tvSum.setText(String.format("%s UAH", String.valueOf(list.get(position).sum)));
+        viewHolder.ivIcon.setImageResource(list.get(position).imgid);
+        viewHolder.ivIcon.setColorFilter(list.get(position).colorid);       // ???
+
         viewHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)

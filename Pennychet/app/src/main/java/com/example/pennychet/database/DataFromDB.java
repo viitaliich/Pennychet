@@ -13,10 +13,24 @@ public class DataFromDB {
     private List<Category> categoriesIncome;
     private List<Account> categoriesAccounts;
 
+    private  List<Transaction> transactionsAll;
+    private  List<Transaction> transactionsExpense;
+    private  List<Transaction> transactionsIncome;
+
     private TransactionDao transactionDao;
     private AccountDao accountDao;
     private AccumulatedDateDao accumulatedDateDao;
     private CategoryDao categoryDao;
+
+    public List<Transaction> getTransactionsAll() { return transactionsAll; }
+    public List<Transaction> getTransactionsExpense()
+    {
+        return transactionsExpense;
+    }
+    public List<Transaction> getTransactionsIncome()
+    {
+        return transactionsIncome;
+    }
 
     public List<Category> getCategoriesExpense()
     {
@@ -56,6 +70,13 @@ public class DataFromDB {
         this.accumulatedDateDao = accumulatedDateDao;
     }
     public AccumulatedDateDao getAccumulatedDateDao() { return accumulatedDateDao; }
+
+    public void getAllTransactions()
+    {
+        transactionsAll = transactionDao.getAll();
+        transactionsExpense = transactionDao.getAllByType("Expense");
+        transactionsIncome = transactionDao.getAllByType("Income");
+    }
 
     public void getAllCategory()
     {

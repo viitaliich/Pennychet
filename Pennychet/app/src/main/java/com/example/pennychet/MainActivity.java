@@ -55,13 +55,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
-
-    ListAdapter listAdapter;
-    RecyclerView recyclerView;
-    ListClickListener listener;
-
-
-
     enum State
     {
         EXPENSE,
@@ -89,6 +82,13 @@ public class MainActivity extends AppCompatActivity
     ArrayList<GridModel> gridModelArrayList;
     GridAdapter adapter;
     ExpandableHeightGridView ctgGridView;
+
+    // Transactions List
+    List<ListData> transactionsList;
+    ListAdapter listAdapter;
+    RecyclerView recyclerView;
+    ListClickListener listener;
+
 
     int[] btnIconArrayExpense = new int[] {
             R.drawable.ic_outline_shopping_cart_64,
@@ -133,45 +133,10 @@ public class MainActivity extends AppCompatActivity
         super.onBackPressed();
     }
 
-    // Sample data for RecyclerView
-    private List<ListData> getData()
-    {
-        List<ListData> list = new ArrayList<>();
-        list.add(new ListData("First Exam",
-                "May 23, 2015",
-                "Best Of Luck"));
-        list.add(new ListData("Second Exam",
-                "June 09, 2015",
-                "b of l"));
-        list.add(new ListData("My Test Exam",
-                "April 27, 2017",
-                "This is testing exam .."));
-
-        return list;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-
-        List<ListData> list = getData();
-
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
-        listener = new ListClickListener() {
-            @Override
-            public void click(int index){
-                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
-            }
-        };
-        listAdapter = new ListAdapter(list, getApplication(),listener);
-        recyclerView.setAdapter(listAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
-
-
 
         mState = State.EXPENSE;
 
@@ -218,6 +183,7 @@ public class MainActivity extends AppCompatActivity
         dataFromDB.setAccumulatedDateDao(db.accumulatedDateDao());
 
         dataFromDB.getAllCategory();
+        dataFromDB.getAllTransactions();
 
         pieDataSetExpense = new PieDataSet(pieChartCategories(dataFromDB, State.EXPENSE), "label");
         pieDataSetIncome = new PieDataSet(pieChartCategories(dataFromDB, State.INCOME), "label");
@@ -246,6 +212,37 @@ public class MainActivity extends AppCompatActivity
                     showBottomSheetCategory(dataFromDB, position);
             }
         });
+
+        // Transactions List
+
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        transactionsList = new ArrayList<>();
+
+        List<Transaction> transactionsExpense = dataFromDB.getTransactionsExpense();
+        for (int i = transactionsExpense.size() - 1; i >= 0; i--)
+        {
+            Transaction transaction = transactionsExpense.get(i);
+            transactionsList.add(new ListData(
+                    transaction.type,
+                    transaction.category,
+                    transaction.account,
+                    transaction.date,
+                    transaction.description,
+                    transaction.sum,
+                    transaction.icon,
+                    transaction.color
+            ));
+        }
+
+        listener = new ListClickListener() {
+            @Override
+            public void click(int index){
+                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
+            }
+        };
+        listAdapter = new ListAdapter(transactionsList, getApplication(),listener);
+        recyclerView.setAdapter(listAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         // PieChart
         setupPieChart(mState);
@@ -319,6 +316,8 @@ public class MainActivity extends AppCompatActivity
     private void swapCategoriesButton(DataFromDB dataFromDB)
     {
         gridModelArrayList.clear();
+        transactionsList.clear();
+
         if(mState == State.EXPENSE)
         {
             mState = State.INCOME;
@@ -326,8 +325,29 @@ public class MainActivity extends AppCompatActivity
 
             for(int i = 0; i < categoriesIncome.length; i++)
             {
-                gridModelArrayList.add(new GridModel(categoriesIncome[i], btnIconArrayIncome[i], ctgColorArrayIncome[i], (int)dataFromDB.getCategoriesIncome().get(i).sum_month));
+                gridModelArrayList.add(new GridModel(
+                        categoriesIncome[i],
+                        btnIconArrayIncome[i],
+                        ctgColorArrayIncome[i],
+                        (int)dataFromDB.getCategoriesIncome().get(i).sum_month));
             }
+
+            List<Transaction> transactionsIncome = dataFromDB.getTransactionsIncome();
+            for (int i = 0; i < transactionsIncome.size(); i++)
+            {
+                Transaction transaction = transactionsIncome.get(i);
+                transactionsList.add(new ListData(
+                        transaction.type,
+                        transaction.category,
+                        transaction.account,
+                        transaction.date,
+                        transaction.description,
+                        transaction.sum,
+                        transaction.icon,
+                        transaction.color
+                ));
+            }
+
         }
         else if(mState == State.INCOME)
         {
@@ -337,6 +357,22 @@ public class MainActivity extends AppCompatActivity
             for(int i = 0; i < categoriesAccount.length; i++)
             {
                 gridModelArrayList.add(new GridModel(categoriesAccount[i], btnIconArrayAccount[i], ctgColorArrayAccount[i], (int)dataFromDB.getCategoriesAccounts().get(i).init_sum));
+            }
+
+            List<Transaction> transactionsAll = dataFromDB.getTransactionsAll();
+            for (int i = 0; i < transactionsAll.size(); i++)
+            {
+                Transaction transaction = transactionsAll.get(i);
+                transactionsList.add(new ListData(
+                        transaction.type,
+                        transaction.category,
+                        transaction.account,
+                        transaction.date,
+                        transaction.description,
+                        transaction.sum,
+                        transaction.icon,
+                        transaction.color
+                ));
             }
         }
         else if(mState == State.ACCOUNT)
@@ -348,18 +384,29 @@ public class MainActivity extends AppCompatActivity
             {
                 gridModelArrayList.add(new GridModel(categoriesExpense[i], btnIconArrayExpense[i], ctgColorArrayExpense[i], (int)dataFromDB.getCategoriesExpense().get(i).sum_month));
             }
+
+            List<Transaction> transactionsExpense = dataFromDB.getTransactionsExpense();
+            for (int i = 0; i < transactionsExpense.size(); i++)
+            {
+                Transaction transaction = transactionsExpense.get(i);
+                transactionsList.add(new ListData(
+                        transaction.type,
+                        transaction.category,
+                        transaction.account,
+                        transaction.date,
+                        transaction.description,
+                        transaction.sum,
+                        transaction.icon,
+                        transaction.color
+                ));
+            }
+
         }
         setupPieChart(mState);
         adapter = new GridAdapter(getApplicationContext(), gridModelArrayList);
+        listAdapter = new ListAdapter(transactionsList, getApplicationContext(), listener);
         ctgGridView.setAdapter(adapter);
-    }
-
-    boolean findStringElement(String[] array, String element)
-    {
-        for (String s : array) {
-            if (element.equals(s)) return true;
-        }
-        return false;
+        recyclerView.setAdapter(listAdapter);
     }
 
     // BottomSheet Category
@@ -432,11 +479,27 @@ public class MainActivity extends AppCompatActivity
                     double sum = Double.parseDouble(String.valueOf(tvBottomSheetSum.getText()));
                     String date = String.valueOf(mDate);
 
+                    int indexCategory = adapterCategory.getPosition(autoCompleteTextViewCategoty.getText().toString());
+
                     Transaction transaction = new Transaction();
 
-                    if(mState == State.EXPENSE)
+                    if(mState == State.EXPENSE) {
                         transaction.type = "Expense";
-                    else transaction.type = "Income";
+                        transaction.icon = btnIconArrayExpense[indexCategory];
+                        transaction.color = ctgColorArrayExpense[indexCategory];
+                    }
+                    else if (mState == State.INCOME)
+                    {
+                        transaction.type = "Income";
+                        transaction.icon = btnIconArrayIncome[indexCategory];
+                        transaction.color = ctgColorArrayIncome[indexCategory];
+                    }
+                    else
+                    {
+                        transaction.type = "Account";
+                        transaction.icon = btnIconArrayAccount[indexCategory];
+                        transaction.color = ctgColorArrayAccount[indexCategory];
+                    }
 
                     transaction.category = category;
                     transaction.account = account;
@@ -445,7 +508,19 @@ public class MainActivity extends AppCompatActivity
                     transaction.date = date;
                     dataFromDB.getTransactionDao().insertAll(transaction);
 
-                    int indexCategory = adapterCategory.getPosition(autoCompleteTextViewCategoty.getText().toString());
+                    transactionsList.add(new ListData(
+                            transaction.type,
+                            transaction.category,
+                            transaction.account,
+                            transaction.date,
+                            transaction.description,
+                            transaction.sum,
+                            transaction.icon,
+                            transaction.color
+                    ));
+                    listAdapter = new ListAdapter(transactionsList, getApplicationContext(), listener);
+                    recyclerView.setAdapter(listAdapter);
+                    dataFromDB.getAllTransactions();        // ??? Optimisation
 
                     double accumulatedSum;
                     if(mState == State.EXPENSE)

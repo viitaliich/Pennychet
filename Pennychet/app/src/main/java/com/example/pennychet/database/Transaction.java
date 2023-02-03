@@ -26,4 +26,10 @@ public class Transaction {
 
     @ColumnInfo(name = "sum")
     public double sum;
+
+    @ColumnInfo(name = "icon")
+    public int icon;
+
+    @ColumnInfo(name = "color")
+    public int color;
 }
