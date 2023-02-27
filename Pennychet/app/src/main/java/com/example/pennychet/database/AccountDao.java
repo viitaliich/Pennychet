@@ -24,8 +24,8 @@ public interface AccountDao {
     @Query("UPDATE account SET name= :new_name WHERE name LIKE :account")
     void updateName(String new_name, String account);
 
-    @Query("UPDATE account SET init_sum= :new_sum WHERE name LIKE :account")
-    void updateInitSum(double new_sum, String account);
+    @Query("UPDATE account SET account_sum= :new_sum WHERE name LIKE :account")
+    void updateAccountSum(double new_sum, String account);
 
     @Delete
     void deleteAll(Transaction... category);

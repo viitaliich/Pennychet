@@ -12,6 +12,6 @@ public class Account {
     @ColumnInfo(name = "name")
     public String name;
 
-    @ColumnInfo(name = "init_sum")
-    public double init_sum;
+    @ColumnInfo(name = "account_sum")
+    public double account_sum;
 }

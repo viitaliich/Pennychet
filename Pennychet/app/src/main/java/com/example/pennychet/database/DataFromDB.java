@@ -87,7 +87,7 @@ public class DataFromDB {
             {
                 Account account = new Account();
                 account.name = accountName;
-                account.init_sum = 0;        // set saved initial value
+                account.account_sum = 0;        // set saved initial value
                 categoriesAccounts.add(account);
                 accountDao.insertAll(account);
             }

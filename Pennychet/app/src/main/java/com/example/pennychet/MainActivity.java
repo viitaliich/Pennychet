@@ -1,5 +1,7 @@
 package com.example.pennychet;
 
+import static java.lang.Double.max;
+
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
@@ -219,7 +221,7 @@ public class MainActivity extends AppCompatActivity
         transactionsList = new ArrayList<>();
 
         List<Transaction> transactionsExpense = dataFromDB.getTransactionsExpense();
-        for (int i = transactionsExpense.size() - 1; i >= 0; i--)
+        for (int i = 0; i < transactionsExpense.size(); i++)
         {
             Transaction transaction = transactionsExpense.get(i);
             transactionsList.add(new ListData(
@@ -356,7 +358,7 @@ public class MainActivity extends AppCompatActivity
 
             for(int i = 0; i < categoriesAccount.length; i++)
             {
-                gridModelArrayList.add(new GridModel(categoriesAccount[i], btnIconArrayAccount[i], ctgColorArrayAccount[i], (int)dataFromDB.getCategoriesAccounts().get(i).init_sum));
+                gridModelArrayList.add(new GridModel(categoriesAccount[i], btnIconArrayAccount[i], ctgColorArrayAccount[i], (int)dataFromDB.getCategoriesAccounts().get(i).account_sum));
             }
 
             List<Transaction> transactionsAll = dataFromDB.getTransactionsAll();
@@ -480,6 +482,7 @@ public class MainActivity extends AppCompatActivity
                     String date = String.valueOf(mDate);
 
                     int indexCategory = adapterCategory.getPosition(autoCompleteTextViewCategoty.getText().toString());
+                    int indexAccount = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
 
                     Transaction transaction = new Transaction();
 
@@ -523,10 +526,12 @@ public class MainActivity extends AppCompatActivity
                     dataFromDB.getAllTransactions();        // ??? Optimisation
 
                     double accumulatedSum;
+                    double accountSum;
                     if(mState == State.EXPENSE)
                     {
                         dataFromDB.getCategoriesExpense().get(indexCategory).sum_month += sum;
                         dataFromDB.getCategoriesExpense().get(indexCategory).sum_year += sum;
+                        dataFromDB.getCategoriesAccounts().get(indexAccount).account_sum -= sum;
                         accumulatedSum = dataFromDB.getCategoriesExpense().get(indexCategory).sum_month;
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
                         updatePieChart(pieChart, pieDataSetExpense, indexCategory, accumulatedSum);
@@ -536,11 +541,16 @@ public class MainActivity extends AppCompatActivity
                     {
                         dataFromDB.getCategoriesIncome().get(indexCategory).sum_month += sum;
                         dataFromDB.getCategoriesIncome().get(indexCategory).sum_year += sum;
+                        dataFromDB.getCategoriesAccounts().get(indexAccount).account_sum += sum;
                         accumulatedSum = dataFromDB.getCategoriesIncome().get(indexCategory).sum_month;
                         dataFromDB.getCategoryDao().updateSumMonth(accumulatedSum, category);
                         updatePieChart(pieChart, pieDataSetIncome, indexCategory, accumulatedSum);
                         gridModelArrayList.get(indexCategory).setSum((int)dataFromDB.getCategoriesIncome().get(indexCategory).sum_month);
                     }
+                    // Update account state
+                    accountSum = dataFromDB.getCategoriesAccounts().get(indexAccount).account_sum;
+                    dataFromDB.getAccountDao().updateAccountSum(accountSum, account);
+                    updatePieChart(pieChart, pieDataSetAccount, indexAccount, accountSum);
 
                     adapter.notifyDataSetChanged();
                     ctgGridView.invalidate();
@@ -594,7 +604,7 @@ public class MainActivity extends AppCompatActivity
         TextInputLayout textFieldBottomSheetAccountDestination = bottomSheetDialog.findViewById(R.id.textFieldBottomSheetAccountDestination);
 
         int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
-        tvBottomSheetInitSum.setText(String.valueOf(dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum));
+        tvBottomSheetInitSum.setText(String.valueOf(dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum));
 
         // Transfer
         Button btnTransfer = bottomSheetDialog.findViewById(R.id.btnBottomSheetTransfer);
@@ -603,9 +613,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
                 int accountIndexDestination = adapterAccount.getPosition(autoCompleteTextViewAccountDestination.getText().toString());
-
-                Log.i("@@@", String.valueOf(accountIndex));
-                Log.i("@@@", String.valueOf(accountIndexDestination));
 
                 textFieldBottomSheetAccountDestination.setErrorEnabled(false);
                 tfBottomSheetTransferSum.setErrorEnabled(false);
@@ -627,21 +634,22 @@ public class MainActivity extends AppCompatActivity
 
 
                     double transfer_sum = Double.parseDouble(tvBottomSheetTransferSum.getText().toString());
-                    double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum;
-                    double init_sum_dest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum;
+                    double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum;
+                    double init_sum_dest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).account_sum;
 
-                    dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum = init_sum - transfer_sum;
-                    dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum = init_sum_dest + transfer_sum;
+                    dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum = init_sum - transfer_sum;
+                    dataFromDB.getCategoriesAccounts().get(accountIndexDestination).account_sum = init_sum_dest + transfer_sum;
 
-                    dataFromDB.getAccountDao().updateInitSum(dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum,
-                            dataFromDB.getCategoriesAccounts().get(accountIndex).name);
-                    dataFromDB.getAccountDao().updateInitSum(dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum,
-                            dataFromDB.getCategoriesAccounts().get(accountIndexDestination).name);
+                    init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum;
+                    init_sum_dest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).account_sum;
 
-                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
-                    updatePieChart(pieChart, pieDataSetAccount, accountIndexDestination, dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum);
-                    gridModelArrayList.get(accountIndex).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
-                    gridModelArrayList.get(accountIndexDestination).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndexDestination).init_sum);
+                    dataFromDB.getAccountDao().updateAccountSum(init_sum, dataFromDB.getCategoriesAccounts().get(accountIndex).name);
+                    dataFromDB.getAccountDao().updateAccountSum(init_sum_dest, dataFromDB.getCategoriesAccounts().get(accountIndexDestination).name);
+
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, max(init_sum, 0));
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndexDestination, max(init_sum_dest, 0));
+                    gridModelArrayList.get(accountIndex).setSum((int) init_sum);
+                    gridModelArrayList.get(accountIndexDestination).setSum((int) init_sum_dest);
 
                     adapter.notifyDataSetChanged();
                     ctgGridView.invalidate();
@@ -661,17 +669,17 @@ public class MainActivity extends AppCompatActivity
                 int accountIndex = adapterAccount.getPosition(autoCompleteTextViewAccount.getText().toString());
 
                 // DB
-                double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum;
+                double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum;
 
                 if (!tvBottomSheetInitSum.getText().toString().isEmpty() &&
                         !tvBottomSheetInitSum.getText().toString().equals(String.valueOf(init_sum))) {
 
                     init_sum = Double.parseDouble(tvBottomSheetInitSum.getText().toString());
 
-                    dataFromDB.getAccountDao().updateInitSum(init_sum, dataFromDB.getCategoriesAccounts().get(accountIndex).name);
-                    dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum = init_sum;
-                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, init_sum);
-                    gridModelArrayList.get(accountIndex).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndex).init_sum);
+                    dataFromDB.getAccountDao().updateAccountSum(init_sum, dataFromDB.getCategoriesAccounts().get(accountIndex).name);
+                    dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum = init_sum;
+                    updatePieChart(pieChart, pieDataSetAccount, accountIndex, max(init_sum, 0));
+                    gridModelArrayList.get(accountIndex).setSum((int) dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum);
                 }
                 adapter.notifyDataSetChanged();
                 ctgGridView.invalidate();
@@ -697,7 +705,7 @@ public class MainActivity extends AppCompatActivity
             accounts = dataFromDB.getCategoriesAccounts();
             for(int i = 0; i < accounts.size(); i++)
             {
-                pieChartCtg.add(new PieEntry((int)accounts.get(i).init_sum, ""));
+                pieChartCtg.add(new PieEntry((int)accounts.get(i).account_sum, ""));
             }
         }
         else
