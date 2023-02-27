@@ -632,7 +632,6 @@ public class MainActivity extends AppCompatActivity
                     tfBottomSheetTransferSum.setError(null);
                     tfBottomSheetTransferSum.setErrorEnabled(false);
 
-
                     double transfer_sum = Double.parseDouble(tvBottomSheetTransferSum.getText().toString());
                     double init_sum = dataFromDB.getCategoriesAccounts().get(accountIndex).account_sum;
                     double init_sum_dest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).account_sum;
@@ -653,6 +652,40 @@ public class MainActivity extends AppCompatActivity
 
                     adapter.notifyDataSetChanged();
                     ctgGridView.invalidate();
+
+                    ///
+
+                    String category = "Account";
+                    String account = dataFromDB.getCategoriesAccounts().get(accountIndex).name;
+                    String accountDest = dataFromDB.getCategoriesAccounts().get(accountIndexDestination).name;
+                    String date = "TODO";
+
+                    Transaction transaction = new Transaction();
+
+                    transaction.type = "Transfer";
+                    transaction.icon = R.drawable.ic_baseline_category_24;
+                    transaction.color = ctgColorArrayAccount[accountIndex];
+
+                    transaction.category = category;
+                    transaction.account = account;
+                    transaction.description = accountDest;
+                    transaction.sum = transfer_sum;
+                    transaction.date = date;
+                    dataFromDB.getTransactionDao().insertAll(transaction);
+
+                    transactionsList.add(new ListData(
+                            transaction.type,
+                            transaction.category,
+                            transaction.account,
+                            transaction.date,
+                            transaction.description,
+                            transaction.sum,
+                            transaction.icon,
+                            transaction.color
+                    ));
+                    listAdapter = new ListAdapter(transactionsList, getApplicationContext(), listener);
+                    recyclerView.setAdapter(listAdapter);
+                    dataFromDB.getAllTransactions();        // ??? Optimisation
 
                     Toast.makeText(MainActivity.this, "Transfer completed", Toast.LENGTH_SHORT
                     ).show();
