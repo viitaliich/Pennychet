@@ -176,9 +176,9 @@ public class MainActivity extends AppCompatActivity
         DataFromDB dataFromDB = new DataFromDB(categoriesExpense, categoriesIncome, categoriesAccount);
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "Transactions").allowMainThreadQueries().build();
+                AppDatabase.class, "MainDB").allowMainThreadQueries().build();
 //        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-//                AppDatabase.class, "Transactions").build();
+//                AppDatabase.class, "MainDB").build();
         dataFromDB.setTransactionDao(db.transactionDao());
         dataFromDB.setCategoryDao(db.categoryDao());
         dataFromDB.setAccountDao(db.accountDao());
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity
         listener = new ListClickListener() {
             @Override
             public void click(int index){
-                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
                 showBottomSheetCategory(dataFromDB, index, true);
             }
         };
@@ -251,8 +251,7 @@ public class MainActivity extends AppCompatActivity
         setupPieChart(mState);
         pieChart.invalidate();
 
-        // Income <-> Expense button
-
+        // Swap Income / Expense / Accounts button
         swapBtn = findViewById(R.id.pieChartButton);
         swapBtnText = findViewById(R.id.pieChartText);
         swapBtn.setOnClickListener(new View.OnClickListener() {
@@ -413,15 +412,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     // BottomSheet Category
-    private void showBottomSheetCategory(DataFromDB dataFromDB, int btnIndex, boolean edit) {
+    private void showBottomSheetCategory(DataFromDB dataFromDB, int btnIndex, boolean editTransaction) {
         ListData old_transaction = null;
-        if(edit) old_transaction = transactionsList.get(btnIndex);
+        if(editTransaction) old_transaction = transactionsList.get(btnIndex);
 
         final ListData transaction_old = old_transaction;
 
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
 
-        if(!edit) bottomSheetDialog.setContentView(R.layout.bottom_sheet_category);
+        if(!editTransaction) bottomSheetDialog.setContentView(R.layout.bottom_sheet_category);
         else bottomSheetDialog.setContentView(R.layout.bottom_sheet_list);
 
         bottomSheetDialog.setCanceledOnTouchOutside(false);
@@ -429,14 +428,34 @@ public class MainActivity extends AppCompatActivity
 
         // Categories drop down menu
         AutoCompleteTextView autoCompleteTextViewCategoty = bottomSheetDialog.findViewById(R.id.actvCategory);
-        String[] categories;
+        String[] categories = {};
 
+        // can be optimized ???
         if(mState == State.EXPENSE) categories = categoriesExpense;
-        else categories = categoriesIncome;
+        else if(mState == State.INCOME) categories = categoriesIncome;
+        else
+        {
+            for(int i = 0; i < categoriesIncome.length; i++) {
+                if (transaction_old.category.equals(categoriesIncome[i])) {
+                    categories = categoriesIncome;
+                    break;
+                }
+            }
+            for(int i = 0; i < categoriesExpense.length; i++)
+            {
+                if(transaction_old.category.equals(categoriesExpense[i]))
+                {
+                    categories = categoriesExpense;
+                    break;
+
+                }
+            }
+        }
+
 
         List<String> categoriesList = Arrays.asList(categories);
-        autoCompleteTextViewCategoty.setText(categoriesList.get(btnIndex));
-        if(edit) autoCompleteTextViewCategoty.setText(transaction_old.category);
+        if(editTransaction) autoCompleteTextViewCategoty.setText(transaction_old.category);
+        else autoCompleteTextViewCategoty.setText(categoriesList.get(btnIndex));
         ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, categoriesList);
         autoCompleteTextViewCategoty.setAdapter(adapterCategory);
@@ -446,14 +465,14 @@ public class MainActivity extends AppCompatActivity
         String[] accounts = getResources().getStringArray(R.array.accounts);
         List<String> accountsList = Arrays.asList(accounts);
         autoCompleteTextViewAccount.setText(accountsList.get(0));
-        if(edit) autoCompleteTextViewAccount.setText(transaction_old.account);
+        if(editTransaction) autoCompleteTextViewAccount.setText(transaction_old.account);
         ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, accountsList);
         autoCompleteTextViewAccount.setAdapter(adapterAccount);
 
         // Calendar
         btnPickDate = bottomSheetDialog.findViewById(R.id.btnBottomSheetPickDate);
-        mDate = edit ? transaction_old.date : new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+        mDate = editTransaction ? transaction_old.date : new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
         btnPickDate.setText(mDate);
         btnPickDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -470,7 +489,7 @@ public class MainActivity extends AppCompatActivity
         Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
         Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
         Button btnBottomSheetDelete = bottomSheetDialog.findViewById(R.id.btnBottomSheetDelete);
-        if(edit)
+        if(editTransaction)
         {
             tvBottomSheetDescription.setText(transaction_old.description);
             tvBottomSheetSum.setText(String.valueOf(transaction_old.sum));
@@ -526,7 +545,7 @@ public class MainActivity extends AppCompatActivity
                     transaction.description = description;
                     transaction.sum = sum;
                     transaction.date = date;
-                    if(edit)
+                    if(editTransaction)
                     {
                         dataFromDB.getTransactionDao().updateCategory(transaction.category, transaction_old.category);
                         dataFromDB.getTransactionDao().updateAccount(transaction.account, transaction_old.category);
@@ -563,7 +582,7 @@ public class MainActivity extends AppCompatActivity
 
                     double accumulatedSum;
                     double accountSum;
-                    if(edit) sum = transaction.sum - transaction_old.sum;
+                    if(editTransaction) sum = transaction.sum - transaction_old.sum;
                     if(mState == State.EXPENSE)
                     {
                         dataFromDB.getCategoriesExpense().get(indexCategory).sum_month += sum;
