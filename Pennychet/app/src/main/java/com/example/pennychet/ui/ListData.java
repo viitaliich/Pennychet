@@ -2,13 +2,13 @@ package com.example.pennychet.ui;
 
 public class ListData {
     String type;
-    String category;
-    String date;
-    String account;
-    String description;
-    double sum;
-    int imgid;
-    int colorid;
+    public String category;
+    public String date;
+    public String account;
+    public String description;
+    public double sum;
+    public int imgid;
+    public int colorid;
 
     public ListData(String type,
                     String category,

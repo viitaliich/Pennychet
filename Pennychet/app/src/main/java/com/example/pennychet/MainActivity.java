@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity
                 if(mState == State.ACCOUNT)
                     showBottomSheetAccount(dataFromDB, position);
                 else
-                    showBottomSheetCategory(dataFromDB, position);
+                    showBottomSheetCategory(dataFromDB, position, false);
             }
         });
 
@@ -240,6 +240,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void click(int index){
                 Toast.makeText(MainActivity.this, "clicked item index is " + index, Toast.LENGTH_SHORT).show();
+                showBottomSheetCategory(dataFromDB, index, true);
             }
         };
         listAdapter = new ListAdapter(transactionsList, getApplication(),listener);
@@ -412,9 +413,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     // BottomSheet Category
-    private void showBottomSheetCategory(DataFromDB dataFromDB, int btnIndex) {
+    private void showBottomSheetCategory(DataFromDB dataFromDB, int btnIndex, boolean edit) {
+        ListData old_transaction = null;
+        if(edit) old_transaction = transactionsList.get(btnIndex);
+
+        final ListData transaction_old = old_transaction;
+
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_category);
+
+        if(!edit) bottomSheetDialog.setContentView(R.layout.bottom_sheet_category);
+        else bottomSheetDialog.setContentView(R.layout.bottom_sheet_list);
+
         bottomSheetDialog.setCanceledOnTouchOutside(false);
         bottomSheetDialog.show();
 
@@ -427,6 +436,7 @@ public class MainActivity extends AppCompatActivity
 
         List<String> categoriesList = Arrays.asList(categories);
         autoCompleteTextViewCategoty.setText(categoriesList.get(btnIndex));
+        if(edit) autoCompleteTextViewCategoty.setText(transaction_old.category);
         ArrayAdapter<String> adapterCategory = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, categoriesList);
         autoCompleteTextViewCategoty.setAdapter(adapterCategory);
@@ -436,13 +446,14 @@ public class MainActivity extends AppCompatActivity
         String[] accounts = getResources().getStringArray(R.array.accounts);
         List<String> accountsList = Arrays.asList(accounts);
         autoCompleteTextViewAccount.setText(accountsList.get(0));
+        if(edit) autoCompleteTextViewAccount.setText(transaction_old.account);
         ArrayAdapter<String> adapterAccount = new ArrayAdapter<>(
                 this, R.layout.drop_down_item, accountsList);
         autoCompleteTextViewAccount.setAdapter(adapterAccount);
 
         // Calendar
         btnPickDate = bottomSheetDialog.findViewById(R.id.btnBottomSheetPickDate);
-        mDate = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
+        mDate = edit ? transaction_old.date : new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(new Date());
         btnPickDate.setText(mDate);
         btnPickDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -458,6 +469,12 @@ public class MainActivity extends AppCompatActivity
         TextView tvBottomSheetDescription = bottomSheetDialog.findViewById(R.id.textViewBottomSheetDescription);
         Button btnBottomSheetOk = bottomSheetDialog.findViewById(R.id.btnBottomSheetOk);
         Button btnBottomSheetCancel = bottomSheetDialog.findViewById(R.id.btnBottomSheetCancel);
+        Button btnBottomSheetDelete = bottomSheetDialog.findViewById(R.id.btnBottomSheetDelete);
+        if(edit)
+        {
+            tvBottomSheetDescription.setText(transaction_old.description);
+            tvBottomSheetSum.setText(String.valueOf(transaction_old.sum));
+        }
 
         btnBottomSheetOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -509,24 +526,44 @@ public class MainActivity extends AppCompatActivity
                     transaction.description = description;
                     transaction.sum = sum;
                     transaction.date = date;
-                    dataFromDB.getTransactionDao().insertAll(transaction);
+                    if(edit)
+                    {
+                        dataFromDB.getTransactionDao().updateCategory(transaction.category, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateAccount(transaction.account, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateDescription(transaction.description, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateSum(transaction.sum, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateDate(transaction.date, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateIcon(transaction.icon, transaction_old.category);
+                        dataFromDB.getTransactionDao().updateColor(transaction.color, transaction_old.category);
 
-                    transactionsList.add(new ListData(
-                            transaction.type,
-                            transaction.category,
-                            transaction.account,
-                            transaction.date,
-                            transaction.description,
-                            transaction.sum,
-                            transaction.icon,
-                            transaction.color
-                    ));
+                        transactionsList.get(btnIndex).category = transaction.category;
+                        transactionsList.get(btnIndex).account = transaction.account;
+                        transactionsList.get(btnIndex).description = transaction.description;
+                        transactionsList.get(btnIndex).sum = transaction.sum;
+                        transactionsList.get(btnIndex).date = transaction.date;
+                        transactionsList.get(btnIndex).imgid = transaction.icon;
+                        transactionsList.get(btnIndex).colorid = transaction.color;
+                    }
+                    else {
+                        dataFromDB.getTransactionDao().insertAll(transaction);
+                        transactionsList.add(new ListData(
+                                transaction.type,
+                                transaction.category,
+                                transaction.account,
+                                transaction.date,
+                                transaction.description,
+                                transaction.sum,
+                                transaction.icon,
+                                transaction.color
+                        ));
+                    }
                     listAdapter = new ListAdapter(transactionsList, getApplicationContext(), listener);
                     recyclerView.setAdapter(listAdapter);
                     dataFromDB.getAllTransactions();        // ??? Optimisation
 
                     double accumulatedSum;
                     double accountSum;
+                    if(edit) sum = transaction.sum - transaction_old.sum;
                     if(mState == State.EXPENSE)
                     {
                         dataFromDB.getCategoriesExpense().get(indexCategory).sum_month += sum;
